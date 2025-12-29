@@ -2,6 +2,7 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
   Plus, 
@@ -20,7 +21,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from "lucide-react";
 import { 
   Button, 
@@ -54,6 +56,7 @@ import {
   useAddSource,
   useRunPipeline,
   usePipelineStatus,
+  useDeleteKnowledgeBase,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
 import type { Source, Video as VideoType, ExtractedConcept, ExtractedEntity, ProcessingStatus } from "@/types";
@@ -64,6 +67,7 @@ type PageProps = {
 
 export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const { id } = use(params);
+  const router = useRouter();
   const { data: kb, isLoading: kbLoading } = useKnowledgeBase(id);
   const { data: sources } = useSources(id);
   const { data: videos } = useVideos(id);
@@ -73,9 +77,11 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   
   const runPipelineMutation = useRunPipeline();
   const addSourceMutation = useAddSource();
+  const deleteMutation = useDeleteKnowledgeBase();
   
   const [activeTab, setActiveTab] = useState("sources");
   const [isAddSourceOpen, setIsAddSourceOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [sourceUrl, setSourceUrl] = useState("");
 
   const detectedSourceType = sourceUrl ? detectYouTubeSourceType(sourceUrl) : null;
@@ -94,6 +100,11 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
   const handleRunPipeline = async () => {
     await runPipelineMutation.mutateAsync(id);
+  };
+
+  const handleDelete = async () => {
+    await deleteMutation.mutateAsync(id);
+    router.push("/knowledge-bases");
   };
 
   const isPipelineRunning = pipelineStatus?.status === "processing";
@@ -203,6 +214,14 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                   <Play className="h-4 w-4" />
                 )}
                 {isPipelineRunning ? "Processing..." : "Run Pipeline"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
               </Button>
             </div>
           </div>
@@ -343,6 +362,36 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
               Add Source
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Knowledge Base</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{kb?.name}"? This action cannot be undone.
+              All sources, videos, and extracted intelligence will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
