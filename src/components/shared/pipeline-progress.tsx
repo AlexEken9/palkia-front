@@ -9,7 +9,6 @@ import {
 import { cn } from "@/lib/utils";
 import { 
   CheckCircle2, 
-  Circle, 
   Loader2, 
   AlertCircle, 
   Film, 
@@ -111,6 +110,15 @@ export function PipelineProgress({ status, className }: PipelineProgressProps) {
             return (
               <div 
                 key={stage.key}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isExpanded}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleExpand(stage.key);
+                  }
+                }}
                 className={cn(
                   "flex-1 group cursor-pointer transition-all duration-300",
                   "flex md:block items-center gap-4 md:gap-0",

@@ -15,7 +15,6 @@ import {
   Database,
   Lightbulb,
   Users,
-  FileText,
   Loader2,
   ExternalLink,
   Youtube,
@@ -478,6 +477,14 @@ function SourcesTab({
   onDeleteSource: (sourceId: string) => void;
   isDeletingSource: boolean;
 }) {
+  const videosBySourceId = useMemo(() => {
+    const map: Record<string, VideoType[]> = {};
+    for (const v of videos) {
+      (map[v.source_id] ??= []).push(v);
+    }
+    return map;
+  }, [videos]);
+
   if (sources.length === 0) {
     return (
       <Card className="border-dashed">
@@ -506,7 +513,7 @@ function SourcesTab({
         <SourceCard 
           key={source.id} 
           source={source} 
-          videos={videos.filter(v => v.source_id === source.id)}
+          videos={videosBySourceId[source.id] ?? []}
           onDelete={() => onDeleteSource(source.id)}
           isDeleting={isDeletingSource}
         />
@@ -884,6 +891,7 @@ function ConceptsTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
         <div className="flex flex-wrap items-center gap-2">
           <Filter className="h-4 w-4 text-silver-500" />
           <select
+            aria-label="Filter concepts by type"
             value={type}
             onChange={(e) => {
               setType(e.target.value);
@@ -902,6 +910,7 @@ function ConceptsTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
           </select>
           
           <select
+            aria-label="Filter concepts by video"
             value={videoId}
             onChange={(e) => {
               setVideoId(e.target.value);
@@ -940,25 +949,24 @@ function ConceptsTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
                     {concept.description}
                   </p>
                   
-                  {/* Restored Metadata */}
-                  {(concept as any).video_title && (
+                  {concept.video_title && (
                     <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
                       <Video className="h-3 w-3 shrink-0" />
-                      {(concept as any).source_url ? (
+                      {concept.source_url ? (
                         <a
-                          href={(concept as any).start_time != null ? `${(concept as any).source_url}&t=${Math.floor((concept as any).start_time)}` : (concept as any).source_url}
+                          href={concept.start_time != null ? `${concept.source_url}&t=${Math.floor(concept.start_time)}` : concept.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="truncate hover:text-palkia-500 hover:underline"
-                          title={(concept as any).video_title}
+                          title={concept.video_title}
                         >
-                          {(concept as any).video_title}
-                          {(concept as any).start_time != null && ` @ ${formatTimestamp((concept as any).start_time)}`}
+                          {concept.video_title}
+                          {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
                         </a>
                       ) : (
-                        <span className="truncate" title={(concept as any).video_title}>
-                          {(concept as any).video_title}
-                          {(concept as any).start_time != null && ` @ ${formatTimestamp((concept as any).start_time)}`}
+                        <span className="truncate" title={concept.video_title}>
+                          {concept.video_title}
+                          {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
                         </span>
                       )}
                     </div>
@@ -1050,6 +1058,7 @@ function EntitiesTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
         <div className="flex flex-wrap items-center gap-2">
           <Filter className="h-4 w-4 text-silver-500" />
           <select
+            aria-label="Filter entities by type"
             value={type}
             onChange={(e) => {
               setType(e.target.value);
@@ -1068,6 +1077,7 @@ function EntitiesTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
           </select>
           
           <select
+            aria-label="Filter entities by video"
             value={videoId}
             onChange={(e) => {
               setVideoId(e.target.value);
@@ -1121,25 +1131,24 @@ function EntitiesTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
                     </a>
                   )}
                   
-                  {/* Restored Metadata */}
-                  {(entity as any).video_title && (
+                  {entity.video_title && (
                     <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
                       <Video className="h-3 w-3 shrink-0" />
-                      {(entity as any).source_url ? (
+                      {entity.source_url ? (
                         <a
-                          href={(entity as any).start_time != null ? `${(entity as any).source_url}&t=${Math.floor((entity as any).start_time)}` : (entity as any).source_url}
+                          href={entity.start_time != null ? `${entity.source_url}&t=${Math.floor(entity.start_time)}` : entity.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="truncate hover:text-palkia-500 hover:underline"
-                          title={(entity as any).video_title}
+                          title={entity.video_title}
                         >
-                          {(entity as any).video_title}
-                          {(entity as any).start_time != null && ` @ ${formatTimestamp((entity as any).start_time)}`}
+                          {entity.video_title}
+                          {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
                         </a>
                       ) : (
-                        <span className="truncate" title={(entity as any).video_title}>
-                          {(entity as any).video_title}
-                          {(entity as any).start_time != null && ` @ ${formatTimestamp((entity as any).start_time)}`}
+                        <span className="truncate" title={entity.video_title}>
+                          {entity.video_title}
+                          {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
                         </span>
                       )}
                     </div>
