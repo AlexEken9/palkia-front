@@ -53,22 +53,24 @@ export const knowledgeBasesApi = {
   getExtractionStatus: (kbId: string) =>
     apiClient.get<ExtractionStatus>(`/knowledge-bases/${kbId}/extraction-status`),
   
-  getConcepts: (kbId: string, page = 1, limit = 20, type?: string, includeOrigin = true) =>
+  getConcepts: (kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) =>
     apiClient.get<PaginatedResponse<ExtractedConcept>>(`/knowledge-bases/${kbId}/concepts`, { 
       params: { 
         limit, 
         skip: (page - 1) * limit, 
         concept_type: type === "all" ? undefined : type, 
+        video_id: videoId === "all" ? undefined : videoId,
         include_origin: includeOrigin 
       } 
     }),
   
-  getEntities: (kbId: string, page = 1, limit = 20, type?: string, includeOrigin = true) =>
+  getEntities: (kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) =>
     apiClient.get<PaginatedResponse<ExtractedEntity>>(`/knowledge-bases/${kbId}/entities`, { 
       params: { 
         limit, 
         skip: (page - 1) * limit, 
         entity_type: type === "all" ? undefined : type, 
+        video_id: videoId === "all" ? undefined : videoId,
         include_origin: includeOrigin 
       } 
     }),

@@ -191,11 +191,11 @@ export function useExtractionStatus(kbId: string) {
   });
 }
 
-export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, includeOrigin = true) {
+export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) {
   return useQuery({
-    queryKey: ["concepts", kbId, page, limit, type, includeOrigin],
+    queryKey: ["concepts", kbId, page, limit, type, videoId, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getConcepts(kbId, page, limit, type, includeOrigin);
+      const { data } = await knowledgeBasesApi.getConcepts(kbId, page, limit, type, videoId, includeOrigin);
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
@@ -203,11 +203,11 @@ export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, i
   });
 }
 
-export function useEntities(kbId: string, page = 1, limit = 20, type?: string, includeOrigin = true) {
+export function useEntities(kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) {
   return useQuery({
-    queryKey: ["entities", kbId, page, limit, type, includeOrigin],
+    queryKey: ["entities", kbId, page, limit, type, videoId, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getEntities(kbId, page, limit, type, includeOrigin);
+      const { data } = await knowledgeBasesApi.getEntities(kbId, page, limit, type, videoId, includeOrigin);
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),

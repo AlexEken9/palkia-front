@@ -319,11 +319,11 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
             </TabsContent>
             
             <TabsContent value="concepts">
-              <ConceptsTab kbId={id} />
+              <ConceptsTab kbId={id} videos={videos || []} />
             </TabsContent>
             
             <TabsContent value="entities">
-              <EntitiesTab kbId={id} />
+              <EntitiesTab kbId={id} videos={videos || []} />
             </TabsContent>
           </Tabs>
         </div>
@@ -757,12 +757,13 @@ function StatusBadge({ status }: { status: ProcessingStatus }) {
   );
 }
 
-function ConceptsTab({ kbId }: { kbId: string }) {
+function ConceptsTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
   const [page, setPage] = useState(1);
   const [type, setType] = useState<string>("all");
+  const [videoId, setVideoId] = useState<string>("all");
   const limit = 20;
   
-  const { data, isLoading } = useConcepts(kbId, page, limit, type);
+  const { data, isLoading } = useConcepts(kbId, page, limit, type, videoId);
   const concepts = data?.items || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
@@ -777,7 +778,7 @@ function ConceptsTab({ kbId }: { kbId: string }) {
     );
   }
 
-  if (concepts.length === 0 && type === "all") {
+  if (concepts.length === 0 && type === "all" && videoId === "all") {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -797,8 +798,8 @@ function ConceptsTab({ kbId }: { kbId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <Filter className="h-4 w-4 text-silver-500" />
           <select
             value={type}
@@ -816,6 +817,22 @@ function ConceptsTab({ kbId }: { kbId: string }) {
             <option value="insight">Insight</option>
             <option value="fact">Fact</option>
             <option value="recommendation">Recommendation</option>
+          </select>
+          
+          <select
+            value={videoId}
+            onChange={(e) => {
+              setVideoId(e.target.value);
+              setPage(1);
+            }}
+            className="h-9 max-w-[200px] rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+          >
+            <option value="all">All Videos</option>
+            {videos.map((video) => (
+              <option key={video.id} value={video.id}>
+                {video.title.substring(0, 30)}{video.title.length > 30 ? "..." : ""}
+              </option>
+            ))}
           </select>
         </div>
         <span className="text-sm text-silver-500">
@@ -840,6 +857,31 @@ function ConceptsTab({ kbId }: { kbId: string }) {
                   <p className="text-sm text-silver-600 dark:text-silver-300">
                     {concept.description}
                   </p>
+                  
+                  {/* Restored Metadata */}
+                  {(concept as any).video_title && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
+                      <Video className="h-3 w-3 shrink-0" />
+                      {(concept as any).source_url ? (
+                        <a
+                          href={(concept as any).start_time != null ? `${(concept as any).source_url}&t=${Math.floor((concept as any).start_time)}` : (concept as any).source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="truncate hover:text-palkia-500 hover:underline"
+                          title={(concept as any).video_title}
+                        >
+                          {(concept as any).video_title}
+                          {(concept as any).start_time != null && ` @ ${formatTimestamp((concept as any).start_time)}`}
+                        </a>
+                      ) : (
+                        <span className="truncate" title={(concept as any).video_title}>
+                          {(concept as any).video_title}
+                          {(concept as any).start_time != null && ` @ ${formatTimestamp((concept as any).start_time)}`}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {concept.context && (
                     <div className="mt-3 text-xs text-silver-500 bg-silver-50 dark:bg-silver-900/50 p-2 rounded border-l-2 border-palkia-300">
                       "{concept.context}"
@@ -881,12 +923,13 @@ function ConceptsTab({ kbId }: { kbId: string }) {
 
 
 
-function EntitiesTab({ kbId }: { kbId: string }) {
+function EntitiesTab({ kbId, videos }: { kbId: string; videos: VideoType[] }) {
   const [page, setPage] = useState(1);
   const [type, setType] = useState<string>("all");
+  const [videoId, setVideoId] = useState<string>("all");
   const limit = 20;
   
-  const { data, isLoading } = useEntities(kbId, page, limit, type);
+  const { data, isLoading } = useEntities(kbId, page, limit, type, videoId);
   const entities = data?.items || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
@@ -901,7 +944,7 @@ function EntitiesTab({ kbId }: { kbId: string }) {
     );
   }
 
-  if (entities.length === 0 && type === "all") {
+  if (entities.length === 0 && type === "all" && videoId === "all") {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -921,8 +964,8 @@ function EntitiesTab({ kbId }: { kbId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <Filter className="h-4 w-4 text-silver-500" />
           <select
             value={type}
@@ -940,6 +983,22 @@ function EntitiesTab({ kbId }: { kbId: string }) {
             <option value="concept">Concept</option>
             <option value="resource">Resource</option>
             <option value="event">Event</option>
+          </select>
+          
+          <select
+            value={videoId}
+            onChange={(e) => {
+              setVideoId(e.target.value);
+              setPage(1);
+            }}
+            className="h-9 max-w-[200px] rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+          >
+            <option value="all">All Videos</option>
+            {videos.map((video) => (
+              <option key={video.id} value={video.id}>
+                {video.title.substring(0, 30)}{video.title.length > 30 ? "..." : ""}
+              </option>
+            ))}
           </select>
         </div>
         <span className="text-sm text-silver-500">
@@ -978,6 +1037,30 @@ function EntitiesTab({ kbId }: { kbId: string }) {
                     >
                       Learn more
                     </a>
+                  )}
+                  
+                  {/* Restored Metadata */}
+                  {(entity as any).video_title && (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
+                      <Video className="h-3 w-3 shrink-0" />
+                      {(entity as any).source_url ? (
+                        <a
+                          href={(entity as any).start_time != null ? `${(entity as any).source_url}&t=${Math.floor((entity as any).start_time)}` : (entity as any).source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="truncate hover:text-palkia-500 hover:underline"
+                          title={(entity as any).video_title}
+                        >
+                          {(entity as any).video_title}
+                          {(entity as any).start_time != null && ` @ ${formatTimestamp((entity as any).start_time)}`}
+                        </a>
+                      ) : (
+                        <span className="truncate" title={(entity as any).video_title}>
+                          {(entity as any).video_title}
+                          {(entity as any).start_time != null && ` @ ${formatTimestamp((entity as any).start_time)}`}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
