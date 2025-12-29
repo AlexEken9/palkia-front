@@ -1,15 +1,50 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { reportsApi } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient, useQueries } from "@tanstack/react-query";
+import { reportsApi, knowledgeBasesApi } from "@/lib/api";
 import { toast } from "sonner";
+import type { IntelligenceReportSummary } from "@/types/api";
+
+export interface ReportWithKBName extends IntelligenceReportSummary {
+  kb_name: string;
+}
 
 export function useReports() {
-  return useQuery({
-    queryKey: ["reports"],
+  const kbsQuery = useQuery({
+    queryKey: ["knowledge-bases"],
     queryFn: async () => {
-      const { data } = await reportsApi.getAll();
+      const { data } = await knowledgeBasesApi.getAll();
       return data;
     },
   });
+
+  const kbs = kbsQuery.data ?? [];
+
+  const reportQueries = useQueries({
+    queries: kbs.map((kb) => ({
+      queryKey: ["reports", kb.id],
+      queryFn: async () => {
+        const { data } = await reportsApi.getByKnowledgeBase(kb.id);
+        return data.map((report): ReportWithKBName => ({
+          ...report,
+          kb_name: kb.name,
+        }));
+      },
+      enabled: !!kb.id,
+    })),
+  });
+
+  const allReports = reportQueries
+    .filter((q) => q.isSuccess && q.data)
+    .flatMap((q) => q.data as ReportWithKBName[])
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const isLoading = kbsQuery.isLoading || reportQueries.some((q) => q.isLoading);
+  const error = kbsQuery.error || reportQueries.find((q) => q.error)?.error;
+
+  return {
+    data: allReports,
+    isLoading,
+    error,
+  };
 }
 
 export function useReportsByKB(kbId: string, includeOldVersions = false) {
