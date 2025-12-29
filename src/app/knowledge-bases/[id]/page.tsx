@@ -58,7 +58,6 @@ import {
   useRunPipeline,
   usePipelineStatus,
   useDeleteKnowledgeBase,
-  useProcessVideos,
   useDeleteSource,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
@@ -79,7 +78,6 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const { data: pipelineStatus } = usePipelineStatus(id);
   
   const runPipelineMutation = useRunPipeline();
-  const processVideosMutation = useProcessVideos(id);
   const addSourceMutation = useAddSource();
   const deleteMutation = useDeleteKnowledgeBase();
   const deleteSourceMutation = useDeleteSource();
@@ -105,10 +103,6 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
   const handleRunPipeline = async () => {
     await runPipelineMutation.mutateAsync(id);
-  };
-
-  const handleProcessVideos = async () => {
-    await processVideosMutation.mutateAsync();
   };
 
   const handleDelete = async () => {
@@ -300,8 +294,6 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                 videos={videos || []}
                 kbId={id}
                 onAddSource={() => setIsAddSourceOpen(true)} 
-                onProcess={handleProcessVideos}
-                isProcessing={processVideosMutation.isPending}
                 onDeleteSource={handleDeleteSource}
                 isDeletingSource={deleteSourceMutation.isPending}
               />
@@ -453,8 +445,6 @@ function SourcesTab({
   videos,
   kbId,
   onAddSource,
-  onProcess,
-  isProcessing,
   onDeleteSource,
   isDeletingSource
 }: { 
@@ -462,8 +452,6 @@ function SourcesTab({
   videos: VideoType[];
   kbId: string;
   onAddSource: () => void;
-  onProcess: () => void;
-  isProcessing: boolean;
   onDeleteSource: (sourceId: string) => void;
   isDeletingSource: boolean;
 }) {
@@ -496,8 +484,6 @@ function SourcesTab({
           key={source.id} 
           source={source} 
           videos={videos.filter(v => v.source_id === source.id)}
-          onProcess={onProcess}
-          isProcessing={isProcessing}
           onDelete={() => onDeleteSource(source.id)}
           isDeleting={isDeletingSource}
         />
@@ -509,15 +495,11 @@ function SourcesTab({
 function SourceCard({ 
   source, 
   videos, 
-  onProcess,
-  isProcessing,
   onDelete,
   isDeleting
 }: { 
   source: Source; 
   videos: VideoType[]; 
-  onProcess: () => void;
-  isProcessing: boolean;
   onDelete: () => void;
   isDeleting: boolean;
 }) {
@@ -612,35 +594,6 @@ function SourceCard({
             </div>
           </div>
         </CardContent>
-        
-        <div className="p-4 pt-0 mt-auto border-t border-silver-100 dark:border-silver-800/50">
-          <div className="mt-4 flex justify-end">
-            <Button 
-              size="sm" 
-              variant={stats.pending > 0 ? "gradient" : "outline"}
-              onClick={onProcess}
-              disabled={stats.pending === 0 || isProcessing || isCardProcessing}
-              className="w-full sm:w-auto"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Starting...
-                </>
-              ) : isCardProcessing ? (
-                <>
-                  <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
-                  Processing
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 h-3 w-3" />
-                  Process Videos
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
       </Card>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

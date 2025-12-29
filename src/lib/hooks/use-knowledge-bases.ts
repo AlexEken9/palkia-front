@@ -144,26 +144,6 @@ export function useProcessingStatus(kbId: string) {
   });
 }
 
-export function useProcessVideos(kbId: string) {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async () => {
-      const response = await knowledgeBasesApi.processVideos(kbId);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["processing-status", kbId] });
-      queryClient.invalidateQueries({ queryKey: ["videos", kbId] });
-      toast.success("Video processing started");
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to start video processing");
-      console.error(error);
-    },
-  });
-}
-
 export function usePipelineStatus(kbId: string) {
   return useQuery({
     queryKey: ["pipeline-status", kbId],
