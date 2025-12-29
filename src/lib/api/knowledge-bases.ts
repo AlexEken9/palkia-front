@@ -49,11 +49,15 @@ export const knowledgeBasesApi = {
   getExtractionStatus: (kbId: string) =>
     apiClient.get<ExtractionStatus>(`/knowledge-bases/${kbId}/extraction-status`),
   
-  getConcepts: (kbId: string, limit = 100) =>
-    apiClient.get<ExtractedConcept[]>(`/knowledge-bases/${kbId}/concepts`, { params: { limit } }),
+  getConcepts: (kbId: string, limit = 100, includeOrigin = true) =>
+    apiClient.get<ExtractedConcept[]>(`/knowledge-bases/${kbId}/concepts`, { 
+      params: { limit, include_origin: includeOrigin } 
+    }),
   
-  getEntities: (kbId: string, limit = 100) =>
-    apiClient.get<ExtractedEntity[]>(`/knowledge-bases/${kbId}/entities`, { params: { limit } }),
+  getEntities: (kbId: string, limit = 100, includeOrigin = true) =>
+    apiClient.get<ExtractedEntity[]>(`/knowledge-bases/${kbId}/entities`, { 
+      params: { limit, include_origin: includeOrigin } 
+    }),
   
   startConsolidation: (kbId: string, options?: { similarity_threshold?: number }) =>
     apiClient.post<ConsolidationStatus>(`/knowledge-bases/${kbId}/consolidate`, options || {}),
