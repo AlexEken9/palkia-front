@@ -6,9 +6,6 @@ import type {
 } from "@/types/api";
 
 export const reportsApi = {
-  getAll: () =>
-    apiClient.get<IntelligenceReportSummary[]>("/reports"),
-  
   getByKnowledgeBase: (kbId: string, includeOldVersions = false) =>
     apiClient.get<IntelligenceReportSummary[]>(`/knowledge-bases/${kbId}/reports`, {
       params: { include_old_versions: includeOldVersions },

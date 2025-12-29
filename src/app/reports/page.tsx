@@ -12,7 +12,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { Navbar, Sidebar } from "@/components/shared";
-import { useReports } from "@/lib/hooks";
+import { useReports, type ReportWithKBName } from "@/lib/hooks";
 import { formatDate } from "@/lib/utils";
 
 export default function ReportsPage() {
@@ -58,7 +58,7 @@ export default function ReportsPage() {
             </Card>
           ) : reports && reports.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {reports.map((report) => (
+              {reports.map((report: ReportWithKBName) => (
                 <Link key={report.id} href={`/reports/${report.id}`}>
                   <Card className="card-palkia h-full cursor-pointer">
                     <CardHeader>
@@ -70,6 +70,9 @@ export default function ReportsPage() {
                           <Badge variant="palkia" className="shrink-0">Latest</Badge>
                         )}
                       </div>
+                      <p className="text-xs text-silver-500 dark:text-silver-400 mt-1">
+                        {report.kb_name}
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center gap-4 text-sm text-silver-500">
