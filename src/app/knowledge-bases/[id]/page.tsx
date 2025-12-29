@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -22,7 +22,8 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
-  Trash2
+  Trash2,
+  Filter
 } from "lucide-react";
 import { 
   Button, 
@@ -290,11 +291,11 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
             </TabsContent>
             
             <TabsContent value="concepts">
-              <ConceptsTab concepts={concepts || []} />
+              <ConceptsTab concepts={concepts || []} videos={videos || []} />
             </TabsContent>
             
             <TabsContent value="entities">
-              <EntitiesTab entities={entities || []} />
+              <EntitiesTab entities={entities || []} videos={videos || []} />
             </TabsContent>
           </Tabs>
         </div>
@@ -579,7 +580,14 @@ function StatusBadge({ status }: { status: ProcessingStatus }) {
   );
 }
 
-function ConceptsTab({ concepts }: { concepts: ExtractedConcept[] }) {
+function ConceptsTab({ concepts, videos }: { concepts: ExtractedConcept[]; videos: VideoType[] }) {
+  const [selectedVideoId, setSelectedVideoId] = useState<string>("all");
+
+  const filteredConcepts = useMemo(() => {
+    if (selectedVideoId === "all") return concepts;
+    return concepts.filter((c) => c.video_id === selectedVideoId);
+  }, [concepts, selectedVideoId]);
+
   if (concepts.length === 0) {
     return (
       <Card className="border-dashed">
@@ -599,57 +607,106 @@ function ConceptsTab({ concepts }: { concepts: ExtractedConcept[] }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {concepts.map((concept) => (
-        <Card key={concept.id} className="card-palkia">
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <CardTitle className="text-base">{concept.name}</CardTitle>
-              <Badge variant="outline" className="text-xs">{concept.concept_type}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-silver-600 dark:text-silver-400 line-clamp-3">
-              {concept.description}
-            </p>
-            {concept.raw_quote && (
-              <blockquote className="mt-3 border-l-2 border-palkia-300 pl-3 text-xs italic text-silver-500">
-                "{concept.raw_quote}"
-              </blockquote>
-            )}
-            {concept.video_title && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
-                <Video className="h-3 w-3 shrink-0" />
-                {concept.source_url ? (
-                  <a
-                    href={concept.start_time != null ? `${concept.source_url}&t=${Math.floor(concept.start_time)}` : concept.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="truncate hover:text-palkia-500 hover:underline"
-                    title={concept.video_title}
-                  >
-                    {concept.video_title}
-                    {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
-                  </a>
-                ) : (
-                  <span className="truncate" title={concept.video_title}>
-                    {concept.video_title}
-                    {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
-                  </span>
-                )}
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-silver-500" />
+        <select
+          value={selectedVideoId}
+          onChange={(e) => setSelectedVideoId(e.target.value)}
+          className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+        >
+          <option value="all">All videos ({concepts.length})</option>
+          {videos.map((video) => {
+            const count = concepts.filter((c) => c.video_id === video.id).length;
+            if (count === 0) return null;
+            return (
+              <option key={video.id} value={video.id}>
+                {video.title} ({count})
+              </option>
+            );
+          })}
+        </select>
+        {selectedVideoId !== "all" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedVideoId("all")}
+            className="text-xs"
+          >
+            Clear filter
+          </Button>
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {filteredConcepts.map((concept) => (
+          <Card key={concept.id} className="card-palkia">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-base">{concept.name}</CardTitle>
+                <Badge variant="outline" className="text-xs">{concept.concept_type}</Badge>
               </div>
-            )}
-            <div className="mt-3 flex items-center justify-between text-xs text-silver-400">
-              <span>Confidence: {Math.round(concept.confidence * 100)}%</span>
-            </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-silver-600 dark:text-silver-400 line-clamp-3">
+                {concept.description}
+              </p>
+              {concept.raw_quote && (
+                <blockquote className="mt-3 border-l-2 border-palkia-300 pl-3 text-xs italic text-silver-500">
+                  "{concept.raw_quote}"
+                </blockquote>
+              )}
+              {concept.video_title && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
+                  <Video className="h-3 w-3 shrink-0" />
+                  {concept.source_url ? (
+                    <a
+                      href={concept.start_time != null ? `${concept.source_url}&t=${Math.floor(concept.start_time)}` : concept.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="truncate hover:text-palkia-500 hover:underline"
+                      title={concept.video_title}
+                    >
+                      {concept.video_title}
+                      {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
+                    </a>
+                  ) : (
+                    <span className="truncate" title={concept.video_title}>
+                      {concept.video_title}
+                      {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="mt-3 flex items-center justify-between text-xs text-silver-400">
+                <span>Confidence: {Math.round(concept.confidence * 100)}%</span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredConcepts.length === 0 && selectedVideoId !== "all" && (
+        <Card className="border-dashed">
+          <CardContent className="py-8">
+            <p className="text-center text-sm text-silver-500">
+              No concepts found for this video
+            </p>
           </CardContent>
         </Card>
-      ))}
+      )}
     </div>
   );
 }
 
-function EntitiesTab({ entities }: { entities: ExtractedEntity[] }) {
+function EntitiesTab({ entities, videos }: { entities: ExtractedEntity[]; videos: VideoType[] }) {
+  const [selectedVideoId, setSelectedVideoId] = useState<string>("all");
+
+  const filteredEntities = useMemo(() => {
+    if (selectedVideoId === "all") return entities;
+    return entities.filter((e) => e.video_id === selectedVideoId);
+  }, [entities, selectedVideoId]);
+
   if (entities.length === 0) {
     return (
       <Card className="border-dashed">
@@ -668,76 +725,118 @@ function EntitiesTab({ entities }: { entities: ExtractedEntity[] }) {
     );
   }
 
-  const groupedByType = entities.reduce((acc, entity) => {
+  const groupedByType = filteredEntities.reduce((acc, entity) => {
     if (!acc[entity.entity_type]) acc[entity.entity_type] = [];
     acc[entity.entity_type].push(entity);
     return acc;
   }, {} as Record<string, ExtractedEntity[]>);
 
   return (
-    <div className="space-y-6">
-      {Object.entries(groupedByType).map(([type, typeEntities]) => (
-        <div key={type}>
-          <h3 className="text-sm font-medium text-silver-500 uppercase tracking-wide mb-3">
-            {type.replace("_", " ")} ({typeEntities.length})
-          </h3>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {typeEntities.map((entity) => (
-              <Card key={entity.id} className="card-palkia">
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-pearl-100 dark:bg-pearl-900/30 p-2">
-                      <Users className="h-4 w-4 text-pearl-500" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-medium text-silver-900 dark:text-silver-100">
-                        {entity.name}
-                      </h4>
-                      {entity.description && (
-                        <p className="text-sm text-silver-500 line-clamp-2 mt-1">
-                          {entity.description}
-                        </p>
-                      )}
-                      {entity.url && (
-                        <a 
-                          href={entity.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-palkia-500 hover:underline mt-1 inline-block"
-                        >
-                          Learn more
-                        </a>
-                      )}
-                      {entity.video_title && (
-                        <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
-                          <Video className="h-3 w-3 shrink-0" />
-                          {entity.source_url ? (
-                            <a
-                              href={entity.start_time != null ? `${entity.source_url}&t=${Math.floor(entity.start_time)}` : entity.source_url}
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-silver-500" />
+        <select
+          value={selectedVideoId}
+          onChange={(e) => setSelectedVideoId(e.target.value)}
+          className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+        >
+          <option value="all">All videos ({entities.length})</option>
+          {videos.map((video) => {
+            const count = entities.filter((e) => e.video_id === video.id).length;
+            if (count === 0) return null;
+            return (
+              <option key={video.id} value={video.id}>
+                {video.title} ({count})
+              </option>
+            );
+          })}
+        </select>
+        {selectedVideoId !== "all" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedVideoId("all")}
+            className="text-xs"
+          >
+            Clear filter
+          </Button>
+        )}
+      </div>
+
+      {Object.keys(groupedByType).length > 0 ? (
+        <div className="space-y-6">
+          {Object.entries(groupedByType).map(([type, typeEntities]) => (
+            <div key={type}>
+              <h3 className="text-sm font-medium text-silver-500 uppercase tracking-wide mb-3">
+                {type.replace("_", " ")} ({typeEntities.length})
+              </h3>
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {typeEntities.map((entity) => (
+                  <Card key={entity.id} className="card-palkia">
+                    <CardContent className="pt-4 pb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-pearl-100 dark:bg-pearl-900/30 p-2">
+                          <Users className="h-4 w-4 text-pearl-500" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-medium text-silver-900 dark:text-silver-100">
+                            {entity.name}
+                          </h4>
+                          {entity.description && (
+                            <p className="text-sm text-silver-500 line-clamp-2 mt-1">
+                              {entity.description}
+                            </p>
+                          )}
+                          {entity.url && (
+                            <a 
+                              href={entity.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="truncate hover:text-palkia-500 hover:underline"
-                              title={entity.video_title}
+                              className="text-xs text-palkia-500 hover:underline mt-1 inline-block"
                             >
-                              {entity.video_title}
-                              {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
+                              Learn more
                             </a>
-                          ) : (
-                            <span className="truncate" title={entity.video_title}>
-                              {entity.video_title}
-                              {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
-                            </span>
+                          )}
+                          {entity.video_title && (
+                            <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
+                              <Video className="h-3 w-3 shrink-0" />
+                              {entity.source_url ? (
+                                <a
+                                  href={entity.start_time != null ? `${entity.source_url}&t=${Math.floor(entity.start_time)}` : entity.source_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="truncate hover:text-palkia-500 hover:underline"
+                                  title={entity.video_title}
+                                >
+                                  {entity.video_title}
+                                  {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
+                                </a>
+                              ) : (
+                                <span className="truncate" title={entity.video_title}>
+                                  {entity.video_title}
+                                  {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      ) : (
+        <Card className="border-dashed">
+          <CardContent className="py-8">
+            <p className="text-center text-sm text-silver-500">
+              No entities found for this video
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
