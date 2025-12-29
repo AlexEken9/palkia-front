@@ -13,6 +13,7 @@ import type {
   PipelineStatus,
   ExtractionStatus,
   ConsolidationStatus,
+  PaginatedResponse,
 } from "@/types/api";
 
 export const knowledgeBasesApi = {
@@ -35,7 +36,7 @@ export const knowledgeBasesApi = {
     apiClient.post<Source>(`/knowledge-bases/${kbId}/sources`, data),
   
   getVideos: (kbId: string) =>
-    apiClient.get<Video[]>(`/knowledge-bases/${kbId}/videos`),
+    apiClient.get<PaginatedResponse<Video>>(`/knowledge-bases/${kbId}/videos`),
   
   getProcessingStatus: (kbId: string) =>
     apiClient.get<ProcessingStatusResponse>(`/knowledge-bases/${kbId}/status`),
@@ -50,12 +51,12 @@ export const knowledgeBasesApi = {
     apiClient.get<ExtractionStatus>(`/knowledge-bases/${kbId}/extraction-status`),
   
   getConcepts: (kbId: string, limit = 100, includeOrigin = true) =>
-    apiClient.get<ExtractedConcept[]>(`/knowledge-bases/${kbId}/concepts`, { 
+    apiClient.get<PaginatedResponse<ExtractedConcept>>(`/knowledge-bases/${kbId}/concepts`, { 
       params: { limit, include_origin: includeOrigin } 
     }),
   
   getEntities: (kbId: string, limit = 100, includeOrigin = true) =>
-    apiClient.get<ExtractedEntity[]>(`/knowledge-bases/${kbId}/entities`, { 
+    apiClient.get<PaginatedResponse<ExtractedEntity>>(`/knowledge-bases/${kbId}/entities`, { 
       params: { limit, include_origin: includeOrigin } 
     }),
   
