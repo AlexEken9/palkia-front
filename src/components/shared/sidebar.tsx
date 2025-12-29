@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   Database,
   FileText,
   Settings,
@@ -14,11 +13,6 @@ import { Button } from "@/components/ui";
 import { useUIStore } from "@/lib/stores";
 
 const navItems = [
-  {
-    title: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
   {
     title: "Knowledge Bases",
     href: "/knowledge-bases",

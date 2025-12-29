@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -107,6 +108,11 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {}
 const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   ({ className, children, ...props }, ref) => {
     const { open, onOpenChange } = useDialogContext();
+    const [mounted, setMounted] = React.useState(false);
+    
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
     
     React.useEffect(() => {
       const handleEscape = (e: KeyboardEvent) => {
@@ -124,11 +130,18 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
       };
     }, [open, onOpenChange]);
     
-    if (!open) return null;
+    if (!open || !mounted) return null;
     
-    return (
+    return createPortal(
       <>
-        <DialogOverlay />
+        <div
+          className={cn(
+            "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
+            "data-[state=open]:animate-in data-[state=closed]:animate-out",
+            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+          )}
+          onClick={() => onOpenChange(false)}
+        />
         <div
           ref={ref}
           className={cn(
@@ -151,7 +164,8 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
             <span className="sr-only">Close</span>
           </button>
         </div>
-      </>
+      </>,
+      document.body
     );
   }
 );
