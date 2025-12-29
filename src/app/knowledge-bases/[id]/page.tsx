@@ -59,6 +59,7 @@ import {
   usePipelineStatus,
   useDeleteKnowledgeBase,
   useProcessVideos,
+  useDeleteSource,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
 import type { Source, Video as VideoType, ExtractedConcept, ExtractedEntity, ProcessingStatus } from "@/types";
@@ -81,6 +82,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const processVideosMutation = useProcessVideos(id);
   const addSourceMutation = useAddSource();
   const deleteMutation = useDeleteKnowledgeBase();
+  const deleteSourceMutation = useDeleteSource();
   
   const [activeTab, setActiveTab] = useState("sources");
   const [isAddSourceOpen, setIsAddSourceOpen] = useState(false);
@@ -112,6 +114,10 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const handleDelete = async () => {
     await deleteMutation.mutateAsync(id);
     router.push("/knowledge-bases");
+  };
+
+  const handleDeleteSource = async (sourceId: string) => {
+    await deleteSourceMutation.mutateAsync({ sourceId, kbId: id });
   };
 
   const isPipelineRunning = pipelineStatus?.status === "processing";
@@ -296,6 +302,8 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                 onAddSource={() => setIsAddSourceOpen(true)} 
                 onProcess={handleProcessVideos}
                 isProcessing={processVideosMutation.isPending}
+                onDeleteSource={handleDeleteSource}
+                isDeletingSource={deleteSourceMutation.isPending}
               />
             </TabsContent>
             
@@ -446,7 +454,9 @@ function SourcesTab({
   kbId,
   onAddSource,
   onProcess,
-  isProcessing
+  isProcessing,
+  onDeleteSource,
+  isDeletingSource
 }: { 
   sources: Source[]; 
   videos: VideoType[];
@@ -454,6 +464,8 @@ function SourcesTab({
   onAddSource: () => void;
   onProcess: () => void;
   isProcessing: boolean;
+  onDeleteSource: (sourceId: string) => void;
+  isDeletingSource: boolean;
 }) {
   if (sources.length === 0) {
     return (
@@ -486,6 +498,8 @@ function SourcesTab({
           videos={videos.filter(v => v.source_id === source.id)}
           onProcess={onProcess}
           isProcessing={isProcessing}
+          onDelete={() => onDeleteSource(source.id)}
+          isDeleting={isDeletingSource}
         />
       ))}
     </div>
@@ -496,13 +510,19 @@ function SourceCard({
   source, 
   videos, 
   onProcess,
-  isProcessing 
+  isProcessing,
+  onDelete,
+  isDeleting
 }: { 
   source: Source; 
   videos: VideoType[]; 
   onProcess: () => void;
   isProcessing: boolean;
+  onDelete: () => void;
+  isDeleting: boolean;
 }) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const stats = useMemo(() => {
     return {
       total: videos.length,
@@ -518,96 +538,140 @@ function SourceCard({
   const activeProcessingCount = stats.downloading + stats.transcribing + stats.processing;
   const isCardProcessing = activeProcessingCount > 0;
   const progressPercent = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
+
+  const handleDelete = () => {
+    onDelete();
+    setIsDeleteDialogOpen(false);
+  };
   
   return (
-    <Card className="card-palkia flex flex-col h-full">
-      <CardContent className="pt-6 flex-1">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="rounded-lg bg-palkia-100 dark:bg-palkia-900/30 p-2 shrink-0">
-            {source.source_type === "youtube_channel" && <User className="h-5 w-5 text-palkia-500" />}
-            {source.source_type === "youtube_playlist" && <ListVideo className="h-5 w-5 text-palkia-500" />}
-            {source.source_type === "youtube_video" && <Youtube className="h-5 w-5 text-palkia-500" />}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate" title={source.title || "Untitled Source"}>
-              {source.title || "Untitled Source"}
-            </h4>
-            <a 
-              href={source.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-silver-500 truncate block hover:text-palkia-500"
+    <>
+      <Card className="card-palkia flex flex-col h-full">
+        <CardContent className="pt-6 flex-1">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="rounded-lg bg-palkia-100 dark:bg-palkia-900/30 p-2 shrink-0">
+              {source.source_type === "youtube_channel" && <User className="h-5 w-5 text-palkia-500" />}
+              {source.source_type === "youtube_playlist" && <ListVideo className="h-5 w-5 text-palkia-500" />}
+              {source.source_type === "youtube_video" && <Youtube className="h-5 w-5 text-palkia-500" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate" title={source.title || "Untitled Source"}>
+                {source.title || "Untitled Source"}
+              </h4>
+              <a 
+                href={source.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-silver-500 truncate block hover:text-palkia-500"
+              >
+                {source.url}
+              </a>
+              <div className="mt-2 text-xs text-silver-400">
+                Added {formatDate(source.created_at)}
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="text-silver-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
             >
-              {source.url}
-            </a>
-            <div className="mt-2 text-xs text-silver-400">
-              Added {formatDate(source.created_at)}
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-silver-500">Progress</span>
+              <span className="font-medium text-silver-900 dark:text-silver-100">
+                {stats.completed} / {stats.total} Videos
+              </span>
+            </div>
+            
+            <Progress value={progressPercent} className="h-2" />
+            
+            <div className="flex flex-wrap gap-2 text-xs">
+              {stats.pending > 0 && (
+                <Badge variant="outline" className="text-silver-500 border-silver-200">
+                  {stats.pending} Pending
+                </Badge>
+              )}
+              {activeProcessingCount > 0 && (
+                <Badge variant="pearl" className="animate-pulse">
+                  {activeProcessingCount} Processing
+                </Badge>
+              )}
+              {stats.failed > 0 && (
+                <Badge variant="destructive" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 hover:text-red-700">
+                  {stats.failed} Failed
+                </Badge>
+              )}
+              {stats.completed === stats.total && stats.total > 0 && (
+                <Badge variant="palkia">All Completed</Badge>
+              )}
             </div>
           </div>
+        </CardContent>
+        
+        <div className="p-4 pt-0 mt-auto border-t border-silver-100 dark:border-silver-800/50">
+          <div className="mt-4 flex justify-end">
+            <Button 
+              size="sm" 
+              variant={stats.pending > 0 ? "gradient" : "outline"}
+              onClick={onProcess}
+              disabled={stats.pending === 0 || isProcessing || isCardProcessing}
+              className="w-full sm:w-auto"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  Starting...
+                </>
+              ) : isCardProcessing ? (
+                <>
+                  <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                  Processing
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-3 w-3" />
+                  Process Videos
+                </>
+              )}
+            </Button>
+          </div>
         </div>
+      </Card>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-silver-500">Progress</span>
-            <span className="font-medium text-silver-900 dark:text-silver-100">
-              {stats.completed} / {stats.total} Videos
-            </span>
-          </div>
-          
-          <Progress value={progressPercent} className="h-2" />
-          
-          <div className="flex flex-wrap gap-2 text-xs">
-            {stats.pending > 0 && (
-              <Badge variant="outline" className="text-silver-500 border-silver-200">
-                {stats.pending} Pending
-              </Badge>
-            )}
-            {activeProcessingCount > 0 && (
-              <Badge variant="pearl" className="animate-pulse">
-                {activeProcessingCount} Processing
-              </Badge>
-            )}
-            {stats.failed > 0 && (
-              <Badge variant="destructive" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 hover:text-red-700">
-                {stats.failed} Failed
-              </Badge>
-            )}
-            {stats.completed === stats.total && stats.total > 0 && (
-              <Badge variant="palkia">All Completed</Badge>
-            )}
-          </div>
-        </div>
-      </CardContent>
-      
-      <div className="p-4 pt-0 mt-auto border-t border-silver-100 dark:border-silver-800/50">
-        <div className="mt-4 flex justify-end">
-          <Button 
-            size="sm" 
-            variant={stats.pending > 0 ? "gradient" : "outline"}
-            onClick={onProcess}
-            disabled={stats.pending === 0 || isProcessing || isCardProcessing}
-            className="w-full sm:w-auto"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                Starting...
-              </>
-            ) : isCardProcessing ? (
-              <>
-                <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
-                Processing
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-3 w-3" />
-                Process Videos
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </Card>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Source</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{source.title || "this source"}"? 
+              This will also delete all {stats.total} associated videos and their data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
