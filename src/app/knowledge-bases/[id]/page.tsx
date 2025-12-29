@@ -491,7 +491,9 @@ function SourcesTab({ sources, onAddSource }: { sources: Source[]; onAddSource: 
 }
 
 function VideosTab({ videos }: { videos: VideoType[] }) {
-  if (videos.length === 0) {
+  const safeVideos = Array.isArray(videos) ? videos : [];
+
+  if (safeVideos.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -511,7 +513,7 @@ function VideosTab({ videos }: { videos: VideoType[] }) {
 
   return (
     <div className="space-y-2">
-      {videos.map((video) => (
+      {safeVideos.map((video) => (
         <Card key={video.id} className="card-palkia">
           <CardContent className="py-3">
             <div className="flex items-center gap-4">
@@ -582,13 +584,15 @@ function StatusBadge({ status }: { status: ProcessingStatus }) {
 
 function ConceptsTab({ concepts, videos }: { concepts: ExtractedConcept[]; videos: VideoType[] }) {
   const [selectedVideoId, setSelectedVideoId] = useState<string>("all");
+  const safeConcepts = Array.isArray(concepts) ? concepts : [];
+  const safeVideos = Array.isArray(videos) ? videos : [];
 
   const filteredConcepts = useMemo(() => {
-    if (selectedVideoId === "all") return concepts;
-    return concepts.filter((c) => c.video_id === selectedVideoId);
-  }, [concepts, selectedVideoId]);
+    if (selectedVideoId === "all") return safeConcepts;
+    return safeConcepts.filter((c) => c.video_id === selectedVideoId);
+  }, [safeConcepts, selectedVideoId]);
 
-  if (concepts.length === 0) {
+  if (safeConcepts.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -615,9 +619,9 @@ function ConceptsTab({ concepts, videos }: { concepts: ExtractedConcept[]; video
           onChange={(e) => setSelectedVideoId(e.target.value)}
           className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
         >
-          <option value="all">All videos ({concepts.length})</option>
-          {videos.map((video) => {
-            const count = concepts.filter((c) => c.video_id === video.id).length;
+          <option value="all">All videos ({safeConcepts.length})</option>
+          {safeVideos.map((video) => {
+            const count = safeConcepts.filter((c) => c.video_id === video.id).length;
             if (count === 0) return null;
             return (
               <option key={video.id} value={video.id}>
@@ -701,13 +705,15 @@ function ConceptsTab({ concepts, videos }: { concepts: ExtractedConcept[]; video
 
 function EntitiesTab({ entities, videos }: { entities: ExtractedEntity[]; videos: VideoType[] }) {
   const [selectedVideoId, setSelectedVideoId] = useState<string>("all");
+  const safeEntities = Array.isArray(entities) ? entities : [];
+  const safeVideos = Array.isArray(videos) ? videos : [];
 
   const filteredEntities = useMemo(() => {
-    if (selectedVideoId === "all") return entities;
-    return entities.filter((e) => e.video_id === selectedVideoId);
-  }, [entities, selectedVideoId]);
+    if (selectedVideoId === "all") return safeEntities;
+    return safeEntities.filter((e) => e.video_id === selectedVideoId);
+  }, [safeEntities, selectedVideoId]);
 
-  if (entities.length === 0) {
+  if (safeEntities.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -740,9 +746,9 @@ function EntitiesTab({ entities, videos }: { entities: ExtractedEntity[]; videos
           onChange={(e) => setSelectedVideoId(e.target.value)}
           className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
         >
-          <option value="all">All videos ({entities.length})</option>
-          {videos.map((video) => {
-            const count = entities.filter((e) => e.video_id === video.id).length;
+          <option value="all">All videos ({safeEntities.length})</option>
+          {safeVideos.map((video) => {
+            const count = safeEntities.filter((e) => e.video_id === video.id).length;
             if (count === 0) return null;
             return (
               <option key={video.id} value={video.id}>
