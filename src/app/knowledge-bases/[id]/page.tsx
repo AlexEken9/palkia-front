@@ -7,6 +7,8 @@ import {
   ArrowLeft, 
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Plus, 
   Play, 
   Video, 
@@ -49,7 +51,7 @@ import {
   Progress,
   Skeleton,
 } from "@/components/ui";
-import { Navbar, Sidebar } from "@/components/shared";
+import { Navbar, Sidebar, PipelineProgress } from "@/components/shared";
 import { 
   useKnowledgeBase, 
   useSources, 
@@ -252,19 +254,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
           {isPipelineRunning && pipelineStatus && (
             <Card className="mb-6 border-palkia-200 dark:border-palkia-800">
               <CardContent className="py-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-silver-700 dark:text-silver-300">
-                    {pipelineStatus.message || `Pipeline Progress: ${pipelineStatus.current_stage}`}
-                  </span>
-                  <span className="text-sm text-silver-500">
-                    {pipelineStatus.progress_percent}%
-                  </span>
-                </div>
-                <Progress 
-                  value={pipelineStatus.progress_percent} 
-                  className="h-2"
-                  indicatorClassName="bg-gradient-to-r from-palkia-500 to-pearl-500"
-                />
+                <PipelineProgress status={pipelineStatus} />
               </CardContent>
             </Card>
           )}
@@ -299,7 +289,6 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
               <TabsTrigger value="sources">Sources</TabsTrigger>
-              <TabsTrigger value="videos">Videos</TabsTrigger>
               <TabsTrigger value="concepts">Concepts</TabsTrigger>
               <TabsTrigger value="entities">Entities</TabsTrigger>
             </TabsList>
@@ -313,10 +302,6 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                 onDeleteSource={handleDeleteSource}
                 isDeletingSource={deleteSourceMutation.isPending}
               />
-            </TabsContent>
-            
-            <TabsContent value="videos">
-              <VideosTab videos={videos || []} />
             </TabsContent>
             
             <TabsContent value="concepts">
@@ -542,6 +527,7 @@ function SourceCard({
   isDeleting: boolean;
 }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { data: ingestionStatus } = useSourceIngestionStatus(source.id);
   
   const isMetadataLoading = !source.title;
@@ -577,7 +563,7 @@ function SourceCard({
   
   return (
     <>
-      <Card className="card-palkia flex flex-col h-full">
+      <Card className="card-palkia flex flex-col h-full transition-all duration-300">
         <CardContent className="pt-6 flex-1">
           <div className="flex items-start gap-3 mb-4">
             <div className="rounded-lg bg-palkia-100 dark:bg-palkia-900/30 p-2 shrink-0">
@@ -657,6 +643,74 @@ function SourceCard({
                 <Badge variant="palkia">All Completed</Badge>
               )}
             </div>
+
+            {videos.length > 0 && (
+              <div className="pt-2">
+                <Button
+                  variant="ghost"
+                  className="w-full flex items-center justify-between text-silver-500 hover:text-silver-900 dark:hover:text-silver-100 hover:bg-silver-100 dark:hover:bg-silver-800/50"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    {isExpanded ? "Hide Videos" : "Show Videos"}
+                  </span>
+                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+
+                {isExpanded && (
+                  <div className="mt-3 space-y-2 border-t border-silver-100 dark:border-silver-800 pt-3 animate-in slide-in-from-top-2 duration-200">
+                    {videos.map((video) => (
+                      <div 
+                        key={video.id} 
+                        className="group flex gap-3 p-2 rounded-lg hover:bg-silver-50 dark:hover:bg-silver-900/50 transition-colors"
+                      >
+                        {video.thumbnail_url ? (
+                          <div className="relative shrink-0">
+                            <img 
+                              src={video.thumbnail_url} 
+                              alt={video.title}
+                              className="h-12 w-20 rounded object-cover border border-silver-200 dark:border-silver-700"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity rounded">
+                              <Play className="h-4 w-4 text-white fill-white" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="h-12 w-20 shrink-0 rounded bg-silver-100 dark:bg-silver-800 flex items-center justify-center border border-silver-200 dark:border-silver-700">
+                            <Video className="h-4 w-4 text-silver-400" />
+                          </div>
+                        )}
+                        
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                          <h5 className="text-sm font-medium text-silver-900 dark:text-silver-100 truncate" title={video.title}>
+                            {video.title}
+                          </h5>
+                          
+                          <div className="flex items-center gap-2 text-xs text-silver-500">
+                            {video.duration_seconds && (
+                              <span className="flex items-center gap-0.5">
+                                <Clock className="h-3 w-3" />
+                                {formatDuration(video.duration_seconds)}
+                              </span>
+                            )}
+                            <StatusBadge status={video.status} />
+                          </div>
+                        </div>
+
+                        <a 
+                          href={`https://youtube.com/watch?v=${video.youtube_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 self-start text-silver-400 hover:text-palkia-500 p-1"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

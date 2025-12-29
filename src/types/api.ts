@@ -215,19 +215,30 @@ export interface IntelligenceReport {
   created_at: string;
 }
 
+export type PipelineStageStatus = "pending" | "in_progress" | "completed" | "failed";
+
 export interface PipelineStageInfo {
-  status: "pending" | "in_progress" | "completed" | "failed";
+  name: string;
+  display_name: string;
+  description: string;
+  status: PipelineStageStatus;
+  progress_percent: number;
   items_processed: number;
   items_total: number;
+  started_at: string | null;
+  completed_at: string | null;
+  error: string | null;
 }
+
+export type PipelineStageKey = "video_processing" | "extraction" | "consolidation" | "report";
 
 export interface PipelineStatus {
   knowledge_base_id: string;
   status: "pending" | "processing" | "completed" | "failed";
-  current_stage: "loading" | "extracting" | "consolidating" | "reporting" | "completed" | "not_started";
+  current_stage: string;
   progress_percent: number;
   message?: string;
-  stages: Record<string, PipelineStageInfo>;
+  stages: Partial<Record<PipelineStageKey, PipelineStageInfo>>;
   errors: string[];
   started_at: string | null;
   completed_at: string | null;
