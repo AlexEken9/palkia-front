@@ -55,7 +55,7 @@ import {
   useRunPipeline,
   usePipelineStatus,
 } from "@/lib/hooks";
-import { formatDate, formatDuration, detectYouTubeSourceType } from "@/lib/utils";
+import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
 import type { Source, Video as VideoType, ExtractedConcept, ExtractedEntity, ProcessingStatus } from "@/types";
 
 type PageProps = {
@@ -568,6 +568,28 @@ function ConceptsTab({ concepts }: { concepts: ExtractedConcept[] }) {
                 "{concept.raw_quote}"
               </blockquote>
             )}
+            {concept.video_title && (
+              <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
+                <Video className="h-3 w-3 shrink-0" />
+                {concept.source_url ? (
+                  <a
+                    href={concept.start_time != null ? `${concept.source_url}&t=${Math.floor(concept.start_time)}` : concept.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate hover:text-palkia-500 hover:underline"
+                    title={concept.video_title}
+                  >
+                    {concept.video_title}
+                    {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
+                  </a>
+                ) : (
+                  <span className="truncate" title={concept.video_title}>
+                    {concept.video_title}
+                    {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
+                  </span>
+                )}
+              </div>
+            )}
             <div className="mt-3 flex items-center justify-between text-xs text-silver-400">
               <span>Confidence: {Math.round(concept.confidence * 100)}%</span>
             </div>
@@ -618,7 +640,7 @@ function EntitiesTab({ entities }: { entities: ExtractedEntity[] }) {
                     <div className="rounded-full bg-pearl-100 dark:bg-pearl-900/30 p-2">
                       <Users className="h-4 w-4 text-pearl-500" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h4 className="font-medium text-silver-900 dark:text-silver-100">
                         {entity.name}
                       </h4>
@@ -636,6 +658,28 @@ function EntitiesTab({ entities }: { entities: ExtractedEntity[] }) {
                         >
                           Learn more
                         </a>
+                      )}
+                      {entity.video_title && (
+                        <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
+                          <Video className="h-3 w-3 shrink-0" />
+                          {entity.source_url ? (
+                            <a
+                              href={entity.start_time != null ? `${entity.source_url}&t=${Math.floor(entity.start_time)}` : entity.source_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="truncate hover:text-palkia-500 hover:underline"
+                              title={entity.video_title}
+                            >
+                              {entity.video_title}
+                              {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
+                            </a>
+                          ) : (
+                            <span className="truncate" title={entity.video_title}>
+                              {entity.video_title}
+                              {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
