@@ -95,6 +95,28 @@ export function useAddSource() {
   });
 }
 
+export function useDeleteSource() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ sourceId, kbId }: { sourceId: string; kbId: string }) => {
+      await knowledgeBasesApi.deleteSource(sourceId);
+      return { kbId };
+    },
+    onSuccess: (_, { kbId }) => {
+      queryClient.invalidateQueries({ queryKey: ["sources", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["videos", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
+      toast.success("Source deleted");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to delete source");
+      console.error(error);
+    },
+  });
+}
+
 export function useVideos(kbId: string) {
   return useQuery({
     queryKey: ["videos", kbId],

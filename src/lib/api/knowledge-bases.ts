@@ -35,6 +35,9 @@ export const knowledgeBasesApi = {
   addSource: (kbId: string, data: SourceCreate) =>
     apiClient.post<Source>(`/knowledge-bases/${kbId}/sources`, data),
   
+  deleteSource: (sourceId: string) =>
+    apiClient.delete(`/sources/${sourceId}`),
+  
   getVideos: (kbId: string) =>
     apiClient.get<PaginatedResponse<Video>>(`/knowledge-bases/${kbId}/videos`),
   
