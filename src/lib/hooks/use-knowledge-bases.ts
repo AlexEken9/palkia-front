@@ -180,25 +180,38 @@ export function useRunPipeline() {
   });
 }
 
-export function useConcepts(kbId: string, limit = 100, includeOrigin = true) {
+export function useExtractionStatus(kbId: string) {
   return useQuery({
-    queryKey: ["concepts", kbId, limit, includeOrigin],
+    queryKey: ["extraction-status", kbId],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getConcepts(kbId, limit, includeOrigin);
-      return data.items;
+      const { data } = await knowledgeBasesApi.getExtractionStatus(kbId);
+      return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
   });
 }
 
-export function useEntities(kbId: string, limit = 100, includeOrigin = true) {
+export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, includeOrigin = true) {
   return useQuery({
-    queryKey: ["entities", kbId, limit, includeOrigin],
+    queryKey: ["concepts", kbId, page, limit, type, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getEntities(kbId, limit, includeOrigin);
-      return data.items;
+      const { data } = await knowledgeBasesApi.getConcepts(kbId, page, limit, type, includeOrigin);
+      return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useEntities(kbId: string, page = 1, limit = 20, type?: string, includeOrigin = true) {
+  return useQuery({
+    queryKey: ["entities", kbId, page, limit, type, includeOrigin],
+    queryFn: async () => {
+      const { data } = await knowledgeBasesApi.getEntities(kbId, page, limit, type, includeOrigin);
+      return data;
+    },
+    enabled: !!kbId && isValidUUID(kbId),
+    placeholderData: (previousData) => previousData,
   });
 }
 

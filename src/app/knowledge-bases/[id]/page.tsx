@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
+  ChevronLeft,
+  ChevronRight,
   Plus, 
   Play, 
   Video, 
@@ -57,6 +59,7 @@ import {
   useAddSource,
   useRunPipeline,
   usePipelineStatus,
+  useExtractionStatus,
   useDeleteKnowledgeBase,
   useDeleteSource,
 } from "@/lib/hooks";
@@ -73,8 +76,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const { data: kb, isLoading: kbLoading } = useKnowledgeBase(id);
   const { data: sources } = useSources(id);
   const { data: videos } = useVideos(id);
-  const { data: concepts } = useConcepts(id);
-  const { data: entities } = useEntities(id);
+  const { data: extractionStatus } = useExtractionStatus(id);
   const { data: pipelineStatus } = usePipelineStatus(id);
   
   const runPipelineMutation = useRunPipeline();
@@ -202,12 +204,12 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                   {sources?.length || 0} sources
                 </span>
                 <span className="flex items-center gap-1">
-                  <Video className="h-4 w-4" />
-                  {videos?.length || 0} videos
+                  <Users className="h-4 w-4" />
+                  {extractionStatus?.entities_extracted || 0} entities
                 </span>
                 <span className="flex items-center gap-1">
                   <Lightbulb className="h-4 w-4" />
-                  {concepts?.length || 0} concepts
+                  {extractionStatus?.concepts_extracted || 0} concepts
                 </span>
               </div>
             </div>
@@ -281,13 +283,13 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
             />
             <StatCard 
               title="Concepts" 
-              value={concepts?.length || 0} 
+              value={extractionStatus?.concepts_extracted || 0} 
               icon={Lightbulb}
               color="palkia"
             />
             <StatCard 
               title="Entities" 
-              value={entities?.length || 0} 
+              value={extractionStatus?.entities_extracted || 0} 
               icon={Users}
               color="pearl"
             />
@@ -317,11 +319,11 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
             </TabsContent>
             
             <TabsContent value="concepts">
-              <ConceptsTab concepts={concepts || []} videos={videos || []} />
+              <ConceptsTab kbId={id} />
             </TabsContent>
             
             <TabsContent value="entities">
-              <EntitiesTab entities={entities || []} videos={videos || []} />
+              <EntitiesTab kbId={id} />
             </TabsContent>
           </Tabs>
         </div>
@@ -755,17 +757,27 @@ function StatusBadge({ status }: { status: ProcessingStatus }) {
   );
 }
 
-function ConceptsTab({ concepts, videos }: { concepts: ExtractedConcept[]; videos: VideoType[] }) {
-  const [selectedVideoId, setSelectedVideoId] = useState<string>("all");
-  const safeConcepts = Array.isArray(concepts) ? concepts : [];
-  const safeVideos = Array.isArray(videos) ? videos : [];
+function ConceptsTab({ kbId }: { kbId: string }) {
+  const [page, setPage] = useState(1);
+  const [type, setType] = useState<string>("all");
+  const limit = 20;
+  
+  const { data, isLoading } = useConcepts(kbId, page, limit, type);
+  const concepts = data?.items || [];
+  const total = data?.total || 0;
+  const totalPages = Math.ceil(total / limit);
 
-  const filteredConcepts = useMemo(() => {
-    if (selectedVideoId === "all") return safeConcepts;
-    return safeConcepts.filter((c) => c.video_id === selectedVideoId);
-  }, [safeConcepts, selectedVideoId]);
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-32 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
 
-  if (safeConcepts.length === 0) {
+  if (concepts.length === 0 && type === "all") {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -785,108 +797,111 @@ function ConceptsTab({ concepts, videos }: { concepts: ExtractedConcept[]; video
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Filter className="h-4 w-4 text-silver-500" />
-        <select
-          value={selectedVideoId}
-          onChange={(e) => setSelectedVideoId(e.target.value)}
-          className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
-        >
-          <option value="all">All videos ({safeConcepts.length})</option>
-          {safeVideos.map((video) => {
-            const count = safeConcepts.filter((c) => c.video_id === video.id).length;
-            if (count === 0) return null;
-            return (
-              <option key={video.id} value={video.id}>
-                {video.title} ({count})
-              </option>
-            );
-          })}
-        </select>
-        {selectedVideoId !== "all" && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedVideoId("all")}
-            className="text-xs"
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-silver-500" />
+          <select
+            value={type}
+            onChange={(e) => {
+              setType(e.target.value);
+              setPage(1);
+            }}
+            className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
           >
-            Clear filter
-          </Button>
-        )}
+            <option value="all">All Types</option>
+            <option value="definition">Definition</option>
+            <option value="framework">Framework</option>
+            <option value="methodology">Methodology</option>
+            <option value="principle">Principle</option>
+            <option value="insight">Insight</option>
+            <option value="fact">Fact</option>
+            <option value="recommendation">Recommendation</option>
+          </select>
+        </div>
+        <span className="text-sm text-silver-500">
+          {total} concepts found
+        </span>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredConcepts.map((concept) => (
+      <div className="grid gap-4">
+        {concepts.map((concept) => (
           <Card key={concept.id} className="card-palkia">
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-base">{concept.name}</CardTitle>
-                <Badge variant="outline" className="text-xs">{concept.concept_type}</Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-silver-600 dark:text-silver-400 line-clamp-3">
-                {concept.description}
-              </p>
-              {concept.raw_quote && (
-                <blockquote className="mt-3 border-l-2 border-palkia-300 pl-3 text-xs italic text-silver-500">
-                  "{concept.raw_quote}"
-                </blockquote>
-              )}
-              {concept.video_title && (
-                <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
-                  <Video className="h-3 w-3 shrink-0" />
-                  {concept.source_url ? (
-                    <a
-                      href={concept.start_time != null ? `${concept.source_url}&t=${Math.floor(concept.start_time)}` : concept.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="truncate hover:text-palkia-500 hover:underline"
-                      title={concept.video_title}
-                    >
-                      {concept.video_title}
-                      {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
-                    </a>
-                  ) : (
-                    <span className="truncate" title={concept.video_title}>
-                      {concept.video_title}
-                      {concept.start_time != null && ` @ ${formatTimestamp(concept.start_time)}`}
-                    </span>
+            <CardContent className="py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-silver-900 dark:text-silver-100">
+                      {concept.name}
+                    </h4>
+                    <Badge variant="outline" className="text-xs uppercase">
+                      {concept.concept_type}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-silver-600 dark:text-silver-300">
+                    {concept.description}
+                  </p>
+                  {concept.context && (
+                    <div className="mt-3 text-xs text-silver-500 bg-silver-50 dark:bg-silver-900/50 p-2 rounded border-l-2 border-palkia-300">
+                      "{concept.context}"
+                    </div>
                   )}
                 </div>
-              )}
-              <div className="mt-3 flex items-center justify-between text-xs text-silver-400">
-                <span>Confidence: {Math.round(concept.confidence * 100)}%</span>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {filteredConcepts.length === 0 && selectedVideoId !== "all" && (
-        <Card className="border-dashed">
-          <CardContent className="py-8">
-            <p className="text-center text-sm text-silver-500">
-              No concepts found for this video
-            </p>
-          </CardContent>
-        </Card>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-silver-500">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
   );
 }
 
-function EntitiesTab({ entities, videos }: { entities: ExtractedEntity[]; videos: VideoType[] }) {
-  const [selectedVideoId, setSelectedVideoId] = useState<string>("all");
-  const safeEntities = Array.isArray(entities) ? entities : [];
-  const safeVideos = Array.isArray(videos) ? videos : [];
 
-  const filteredEntities = useMemo(() => {
-    if (selectedVideoId === "all") return safeEntities;
-    return safeEntities.filter((e) => e.video_id === selectedVideoId);
-  }, [safeEntities, selectedVideoId]);
 
-  if (safeEntities.length === 0) {
+function EntitiesTab({ kbId }: { kbId: string }) {
+  const [page, setPage] = useState(1);
+  const [type, setType] = useState<string>("all");
+  const limit = 20;
+  
+  const { data, isLoading } = useEntities(kbId, page, limit, type);
+  const entities = data?.items || [];
+  const total = data?.total || 0;
+  const totalPages = Math.ceil(total / limit);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-32 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (entities.length === 0 && type === "all") {
     return (
       <Card className="border-dashed">
         <CardContent className="py-12">
@@ -904,117 +919,95 @@ function EntitiesTab({ entities, videos }: { entities: ExtractedEntity[]; videos
     );
   }
 
-  const groupedByType = filteredEntities.reduce((acc, entity) => {
-    if (!acc[entity.entity_type]) acc[entity.entity_type] = [];
-    acc[entity.entity_type].push(entity);
-    return acc;
-  }, {} as Record<string, ExtractedEntity[]>);
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Filter className="h-4 w-4 text-silver-500" />
-        <select
-          value={selectedVideoId}
-          onChange={(e) => setSelectedVideoId(e.target.value)}
-          className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
-        >
-          <option value="all">All videos ({safeEntities.length})</option>
-          {safeVideos.map((video) => {
-            const count = safeEntities.filter((e) => e.video_id === video.id).length;
-            if (count === 0) return null;
-            return (
-              <option key={video.id} value={video.id}>
-                {video.title} ({count})
-              </option>
-            );
-          })}
-        </select>
-        {selectedVideoId !== "all" && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedVideoId("all")}
-            className="text-xs"
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-silver-500" />
+          <select
+            value={type}
+            onChange={(e) => {
+              setType(e.target.value);
+              setPage(1);
+            }}
+            className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
           >
-            Clear filter
-          </Button>
-        )}
+            <option value="all">All Types</option>
+            <option value="person">Person</option>
+            <option value="book">Book</option>
+            <option value="tool">Tool</option>
+            <option value="company">Company</option>
+            <option value="concept">Concept</option>
+            <option value="resource">Resource</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+        <span className="text-sm text-silver-500">
+          {total} entities found
+        </span>
       </div>
 
-      {Object.keys(groupedByType).length > 0 ? (
-        <div className="space-y-6">
-          {Object.entries(groupedByType).map(([type, typeEntities]) => (
-            <div key={type}>
-              <h3 className="text-sm font-medium text-silver-500 uppercase tracking-wide mb-3">
-                {type.replace("_", " ")} ({typeEntities.length})
-              </h3>
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {typeEntities.map((entity) => (
-                  <Card key={entity.id} className="card-palkia">
-                    <CardContent className="pt-4 pb-4">
-                      <div className="flex items-start gap-3">
-                        <div className="rounded-full bg-pearl-100 dark:bg-pearl-900/30 p-2">
-                          <Users className="h-4 w-4 text-pearl-500" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-medium text-silver-900 dark:text-silver-100">
-                            {entity.name}
-                          </h4>
-                          {entity.description && (
-                            <p className="text-sm text-silver-500 line-clamp-2 mt-1">
-                              {entity.description}
-                            </p>
-                          )}
-                          {entity.url && (
-                            <a 
-                              href={entity.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-palkia-500 hover:underline mt-1 inline-block"
-                            >
-                              Learn more
-                            </a>
-                          )}
-                          {entity.video_title && (
-                            <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
-                              <Video className="h-3 w-3 shrink-0" />
-                              {entity.source_url ? (
-                                <a
-                                  href={entity.start_time != null ? `${entity.source_url}&t=${Math.floor(entity.start_time)}` : entity.source_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="truncate hover:text-palkia-500 hover:underline"
-                                  title={entity.video_title}
-                                >
-                                  {entity.video_title}
-                                  {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
-                                </a>
-                              ) : (
-                                <span className="truncate" title={entity.video_title}>
-                                  {entity.video_title}
-                                  {entity.start_time != null && ` @ ${formatTimestamp(entity.start_time)}`}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {entities.map((entity) => (
+          <Card key={entity.id} className="card-palkia">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-pearl-100 dark:bg-pearl-900/30 p-2">
+                  <Users className="h-4 w-4 text-pearl-500" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-silver-900 dark:text-silver-100">
+                      {entity.name}
+                    </h4>
+                    <Badge variant="outline" className="text-xs uppercase">
+                      {entity.entity_type}
+                    </Badge>
+                  </div>
+                  {entity.description && (
+                    <p className="text-sm text-silver-500 line-clamp-2 mt-1">
+                      {entity.description}
+                    </p>
+                  )}
+                  {entity.url && (
+                    <a 
+                      href={entity.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-palkia-500 hover:underline mt-1 inline-block"
+                    >
+                      Learn more
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-silver-500">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-      ) : (
-        <Card className="border-dashed">
-          <CardContent className="py-8">
-            <p className="text-center text-sm text-silver-500">
-              No entities found for this video
-            </p>
-          </CardContent>
-        </Card>
       )}
     </div>
   );
