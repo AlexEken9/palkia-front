@@ -198,6 +198,7 @@ export interface PipelineStatus {
   status: "pending" | "processing" | "completed" | "failed";
   current_stage: "loading" | "extracting" | "consolidating" | "reporting" | "completed" | "not_started";
   progress_percent: number;
+  message?: string;
   stages: Record<string, PipelineStageInfo>;
   errors: string[];
   started_at: string | null;

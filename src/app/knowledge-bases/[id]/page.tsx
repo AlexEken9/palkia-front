@@ -253,7 +253,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
               <CardContent className="py-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-silver-700 dark:text-silver-300">
-                    Pipeline Progress: {pipelineStatus.current_stage}
+                    {pipelineStatus.message || `Pipeline Progress: ${pipelineStatus.current_stage}`}
                   </span>
                   <span className="text-sm text-silver-500">
                     {pipelineStatus.progress_percent}%
