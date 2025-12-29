@@ -58,6 +58,7 @@ import {
   useRunPipeline,
   usePipelineStatus,
   useDeleteKnowledgeBase,
+  useProcessVideos,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
 import type { Source, Video as VideoType, ExtractedConcept, ExtractedEntity, ProcessingStatus } from "@/types";
@@ -77,6 +78,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const { data: pipelineStatus } = usePipelineStatus(id);
   
   const runPipelineMutation = useRunPipeline();
+  const processVideosMutation = useProcessVideos(id);
   const addSourceMutation = useAddSource();
   const deleteMutation = useDeleteKnowledgeBase();
   
@@ -101,6 +103,10 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
   const handleRunPipeline = async () => {
     await runPipelineMutation.mutateAsync(id);
+  };
+
+  const handleProcessVideos = async () => {
+    await processVideosMutation.mutateAsync();
   };
 
   const handleDelete = async () => {
@@ -283,7 +289,14 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
             </TabsList>
             
             <TabsContent value="sources">
-              <SourcesTab sources={sources || []} onAddSource={() => setIsAddSourceOpen(true)} />
+              <SourcesTab 
+                sources={sources || []} 
+                videos={videos || []}
+                kbId={id}
+                onAddSource={() => setIsAddSourceOpen(true)} 
+                onProcess={handleProcessVideos}
+                isProcessing={processVideosMutation.isPending}
+              />
             </TabsContent>
             
             <TabsContent value="videos">
@@ -427,7 +440,21 @@ function StatCard({
   );
 }
 
-function SourcesTab({ sources, onAddSource }: { sources: Source[]; onAddSource: () => void }) {
+function SourcesTab({ 
+  sources, 
+  videos,
+  kbId,
+  onAddSource,
+  onProcess,
+  isProcessing
+}: { 
+  sources: Source[]; 
+  videos: VideoType[];
+  kbId: string;
+  onAddSource: () => void;
+  onProcess: () => void;
+  isProcessing: boolean;
+}) {
   if (sources.length === 0) {
     return (
       <Card className="border-dashed">
@@ -453,40 +480,134 @@ function SourcesTab({ sources, onAddSource }: { sources: Source[]; onAddSource: 
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {sources.map((source) => (
-        <Card key={source.id} className="card-palkia">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-palkia-100 dark:bg-palkia-900/30 p-2">
-                {source.source_type === "youtube_channel" && <User className="h-5 w-5 text-palkia-500" />}
-                {source.source_type === "youtube_playlist" && <ListVideo className="h-5 w-5 text-palkia-500" />}
-                {source.source_type === "youtube_video" && <Youtube className="h-5 w-5 text-palkia-500" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate">
-                  {source.title || "Untitled Source"}
-                </h4>
-                <p className="text-sm text-silver-500 truncate">{source.url}</p>
-                <div className="mt-2 flex items-center gap-3 text-xs text-silver-400">
-                  <span className="flex items-center gap-1">
-                    <Video className="h-3 w-3" />
-                    {source.video_count} videos
-                  </span>
-                  <span>{formatDate(source.created_at)}</span>
-                </div>
-              </div>
-              <a 
-                href={source.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-silver-400 hover:text-palkia-500"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </div>
-          </CardContent>
-        </Card>
+        <SourceCard 
+          key={source.id} 
+          source={source} 
+          videos={videos.filter(v => v.source_id === source.id)}
+          onProcess={onProcess}
+          isProcessing={isProcessing}
+        />
       ))}
     </div>
+  );
+}
+
+function SourceCard({ 
+  source, 
+  videos, 
+  onProcess,
+  isProcessing 
+}: { 
+  source: Source; 
+  videos: VideoType[]; 
+  onProcess: () => void;
+  isProcessing: boolean;
+}) {
+  const stats = useMemo(() => {
+    return {
+      total: videos.length,
+      pending: videos.filter(v => v.status === "pending").length,
+      downloading: videos.filter(v => v.status === "downloading").length,
+      transcribing: videos.filter(v => v.status === "transcribing").length,
+      processing: videos.filter(v => ["processing", "extracting"].includes(v.status)).length,
+      completed: videos.filter(v => v.status === "completed").length,
+      failed: videos.filter(v => v.status === "failed").length,
+    };
+  }, [videos]);
+
+  const activeProcessingCount = stats.downloading + stats.transcribing + stats.processing;
+  const isCardProcessing = activeProcessingCount > 0;
+  const progressPercent = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
+  
+  return (
+    <Card className="card-palkia flex flex-col h-full">
+      <CardContent className="pt-6 flex-1">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="rounded-lg bg-palkia-100 dark:bg-palkia-900/30 p-2 shrink-0">
+            {source.source_type === "youtube_channel" && <User className="h-5 w-5 text-palkia-500" />}
+            {source.source_type === "youtube_playlist" && <ListVideo className="h-5 w-5 text-palkia-500" />}
+            {source.source_type === "youtube_video" && <Youtube className="h-5 w-5 text-palkia-500" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate" title={source.title || "Untitled Source"}>
+              {source.title || "Untitled Source"}
+            </h4>
+            <a 
+              href={source.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-silver-500 truncate block hover:text-palkia-500"
+            >
+              {source.url}
+            </a>
+            <div className="mt-2 text-xs text-silver-400">
+              Added {formatDate(source.created_at)}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-silver-500">Progress</span>
+            <span className="font-medium text-silver-900 dark:text-silver-100">
+              {stats.completed} / {stats.total} Videos
+            </span>
+          </div>
+          
+          <Progress value={progressPercent} className="h-2" />
+          
+          <div className="flex flex-wrap gap-2 text-xs">
+            {stats.pending > 0 && (
+              <Badge variant="outline" className="text-silver-500 border-silver-200">
+                {stats.pending} Pending
+              </Badge>
+            )}
+            {activeProcessingCount > 0 && (
+              <Badge variant="pearl" className="animate-pulse">
+                {activeProcessingCount} Processing
+              </Badge>
+            )}
+            {stats.failed > 0 && (
+              <Badge variant="destructive" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 hover:text-red-700">
+                {stats.failed} Failed
+              </Badge>
+            )}
+            {stats.completed === stats.total && stats.total > 0 && (
+              <Badge variant="palkia">All Completed</Badge>
+            )}
+          </div>
+        </div>
+      </CardContent>
+      
+      <div className="p-4 pt-0 mt-auto border-t border-silver-100 dark:border-silver-800/50">
+        <div className="mt-4 flex justify-end">
+          <Button 
+            size="sm" 
+            variant={stats.pending > 0 ? "gradient" : "outline"}
+            onClick={onProcess}
+            disabled={stats.pending === 0 || isProcessing || isCardProcessing}
+            className="w-full sm:w-auto"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                Starting...
+              </>
+            ) : isCardProcessing ? (
+              <>
+                <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                Processing
+              </>
+            ) : (
+              <>
+                <Play className="mr-2 h-3 w-3" />
+                Process Videos
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </Card>
   );
 }
 
