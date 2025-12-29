@@ -178,22 +178,22 @@ export function useRunPipeline() {
   });
 }
 
-export function useConcepts(kbId: string, limit = 100) {
+export function useConcepts(kbId: string, limit = 100, includeOrigin = true) {
   return useQuery({
-    queryKey: ["concepts", kbId, limit],
+    queryKey: ["concepts", kbId, limit, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getConcepts(kbId, limit);
+      const { data } = await knowledgeBasesApi.getConcepts(kbId, limit, includeOrigin);
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
   });
 }
 
-export function useEntities(kbId: string, limit = 100) {
+export function useEntities(kbId: string, limit = 100, includeOrigin = true) {
   return useQuery({
-    queryKey: ["entities", kbId, limit],
+    queryKey: ["entities", kbId, limit, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getEntities(kbId, limit);
+      const { data } = await knowledgeBasesApi.getEntities(kbId, limit, includeOrigin);
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
