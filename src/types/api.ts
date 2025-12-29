@@ -116,6 +116,11 @@ export interface ExtractedConcept {
   raw_quote: string | null;
   confidence: number;
   created_at: string;
+  video_id?: string;
+  video_title?: string;
+  source_id?: string;
+  source_url?: string;
+  start_time?: number | null;
 }
 
 export interface ExtractedEntity {
@@ -128,6 +133,11 @@ export interface ExtractedEntity {
   sentiment: string | null;
   url: string | null;
   created_at: string;
+  video_id?: string;
+  video_title?: string;
+  source_id?: string;
+  source_url?: string;
+  start_time?: number | null;
 }
 
 export interface ConsolidatedIdea {
