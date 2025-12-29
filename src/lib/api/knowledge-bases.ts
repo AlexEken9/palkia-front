@@ -4,6 +4,7 @@ import type {
   KnowledgeBaseCreate,
   Source,
   SourceCreate,
+  SourceIngestionStatus,
   Video,
   ProcessingStatusResponse,
   ExtractedConcept,
@@ -37,6 +38,9 @@ export const knowledgeBasesApi = {
   
   deleteSource: (sourceId: string) =>
     apiClient.delete(`/sources/${sourceId}`),
+  
+  getSourceIngestionStatus: (sourceId: string) =>
+    apiClient.get<SourceIngestionStatus>(`/sources/${sourceId}/ingestion-status`),
   
   getVideos: (kbId: string) =>
     apiClient.get<PaginatedResponse<Video>>(`/knowledge-bases/${kbId}/videos`),

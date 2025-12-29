@@ -62,6 +62,7 @@ import {
   useExtractionStatus,
   useDeleteKnowledgeBase,
   useDeleteSource,
+  useSourceIngestionStatus,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
 import type { Source, Video as VideoType, ExtractedConcept, ExtractedEntity, ProcessingStatus } from "@/types";
@@ -541,6 +542,9 @@ function SourceCard({
   isDeleting: boolean;
 }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { data: ingestionStatus } = useSourceIngestionStatus(source.id);
+  
+  const isMetadataLoading = !source.title;
 
   const stats = useMemo(() => {
     return {
@@ -555,13 +559,21 @@ function SourceCard({
   }, [videos]);
 
   const activeProcessingCount = stats.downloading + stats.transcribing + stats.processing;
-  const isCardProcessing = activeProcessingCount > 0;
   const progressPercent = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
 
   const handleDelete = () => {
     onDelete();
     setIsDeleteDialogOpen(false);
   };
+
+  const getIngestionMessage = () => {
+    if (isMetadataLoading) return "Extrayendo metadatos...";
+    if (!ingestionStatus) return null;
+    return ingestionStatus.message;
+  };
+
+  const ingestionMessage = getIngestionMessage();
+  const showIngestionStatus = isMetadataLoading || (ingestionStatus && ingestionStatus.status === "processing");
   
   return (
     <>
@@ -574,17 +586,26 @@ function SourceCard({
               {source.source_type === "youtube_video" && <Youtube className="h-5 w-5 text-palkia-500" />}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate" title={source.title || "Untitled Source"}>
-                {source.title || "Untitled Source"}
-              </h4>
-              <a 
-                href={source.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-sm text-silver-500 truncate block hover:text-palkia-500"
-              >
-                {source.url}
-              </a>
+              {isMetadataLoading ? (
+                <>
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-3 w-1/2" />
+                </>
+              ) : (
+                <>
+                  <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate" title={source.title || "Untitled Source"}>
+                    {source.title || "Untitled Source"}
+                  </h4>
+                  <a 
+                    href={source.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-silver-500 truncate block hover:text-palkia-500"
+                  >
+                    {source.url}
+                  </a>
+                </>
+              )}
               <div className="mt-2 text-xs text-silver-400">
                 Added {formatDate(source.created_at)}
               </div>
@@ -598,6 +619,13 @@ function SourceCard({
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
+
+          {showIngestionStatus && ingestionMessage && (
+            <div className="mb-3 flex items-center gap-2 text-sm text-palkia-600 dark:text-palkia-400 bg-palkia-50 dark:bg-palkia-900/20 rounded-lg px-3 py-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>{ingestionMessage}</span>
+            </div>
+          )}
 
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">

@@ -81,6 +81,34 @@ export interface SourceCreate {
   language?: string | null;
 }
 
+export interface VideoStatusCounts {
+  total: number;
+  pending: number;
+  downloading: number;
+  transcribing: number;
+  processing: number;
+  completed: number;
+  failed: number;
+}
+
+export interface CurrentVideoInfo {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export interface SourceIngestionStatus {
+  source_id: string;
+  source_type: string;
+  title: string | null;
+  status: "fetching_metadata" | "processing" | "completed" | "failed";
+  progress_percent: number;
+  current_stage: string;
+  message: string | null;
+  videos: VideoStatusCounts;
+  current_video: CurrentVideoInfo | null;
+}
+
 export interface Video {
   id: string;
   source_id: string;

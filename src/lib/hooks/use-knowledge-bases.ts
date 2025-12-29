@@ -117,6 +117,22 @@ export function useDeleteSource() {
   });
 }
 
+export function useSourceIngestionStatus(sourceId: string) {
+  return useQuery({
+    queryKey: ["source-ingestion", sourceId],
+    queryFn: async () => {
+      const { data } = await knowledgeBasesApi.getSourceIngestionStatus(sourceId);
+      return data;
+    },
+    enabled: !!sourceId,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (data?.status === "completed" || data?.status === "failed") return false;
+      return 2000;
+    },
+  });
+}
+
 export function useVideos(kbId: string) {
   return useQuery({
     queryKey: ["videos", kbId],
