@@ -1,26 +1,268 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================================
+   PALKIA THEME - Swiss Design with Iridescent Accents
+   Based on Palkia (Spatial Pokemon): Violet, Silver, Pearl/Iridescent
+   ============================================================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /* ========== PALKIA COLOR PALETTE ========== */
+  
+  /* Primary - Violet (Palkia's main body color) */
+  --color-palkia-50: #faf5ff;
+  --color-palkia-100: #f3e8ff;
+  --color-palkia-200: #e9d5ff;
+  --color-palkia-300: #d8b4fe;
+  --color-palkia-400: #c084fc;
+  --color-palkia-500: #a855f7;
+  --color-palkia-600: #9333ea;
+  --color-palkia-700: #7e22ce;
+  --color-palkia-800: #6b21a8;
+  --color-palkia-900: #581c87;
+  --color-palkia-950: #3b0764;
+  
+  /* Silver (Palkia's metallic armor) */
+  --color-silver-50: #fafafa;
+  --color-silver-100: #f4f4f5;
+  --color-silver-200: #e4e4e7;
+  --color-silver-300: #d4d4d8;
+  --color-silver-400: #a1a1aa;
+  --color-silver-500: #71717a;
+  --color-silver-600: #52525b;
+  --color-silver-700: #3f3f46;
+  --color-silver-800: #27272a;
+  --color-silver-900: #18181b;
+  --color-silver-950: #09090b;
+  
+  /* Accent - Pearl/Magenta (Palkia's pearl shoulders) */
+  --color-pearl-50: #fdf4ff;
+  --color-pearl-100: #fae8ff;
+  --color-pearl-200: #f5d0fe;
+  --color-pearl-300: #f0abfc;
+  --color-pearl-400: #e879f9;
+  --color-pearl-500: #d946ef;
+  --color-pearl-600: #c026d3;
+  --color-pearl-700: #a21caf;
+  --color-pearl-800: #86198f;
+  --color-pearl-900: #701a75;
+  --color-pearl-950: #4a044e;
+  
+  /* Semantic Colors */
+  --color-background: var(--color-silver-50);
+  --color-foreground: var(--color-silver-900);
+  --color-muted: var(--color-silver-100);
+  --color-muted-foreground: var(--color-silver-500);
+  --color-border: var(--color-silver-200);
+  --color-input: var(--color-silver-200);
+  --color-ring: var(--color-palkia-500);
+  
+  --color-primary: var(--color-palkia-500);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-silver-100);
+  --color-secondary-foreground: var(--color-silver-900);
+  --color-accent: var(--color-pearl-500);
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-silver-900);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-silver-900);
+  
+  /* Shadows */
+  --shadow-palkia: 0 4px 14px -3px rgba(168, 85, 247, 0.25);
+  --shadow-palkia-lg: 0 10px 40px -10px rgba(168, 85, 247, 0.35);
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark Mode */
+.dark {
+  --color-background: var(--color-silver-950);
+  --color-foreground: var(--color-silver-50);
+  --color-muted: var(--color-silver-800);
+  --color-muted-foreground: var(--color-silver-400);
+  --color-border: var(--color-silver-800);
+  --color-input: var(--color-silver-800);
+  
+  --color-card: var(--color-silver-900);
+  --color-card-foreground: var(--color-silver-50);
+  --color-popover: var(--color-silver-900);
+  --color-popover-foreground: var(--color-silver-50);
+  
+  --color-secondary: var(--color-silver-800);
+  --color-secondary-foreground: var(--color-silver-50);
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+* {
+  border-color: var(--color-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+   PALKIA SPECIAL EFFECTS
+   ============================================================================ */
+
+/* Iridescent gradient animation */
+@keyframes iridescent {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.palkia-gradient {
+  background: linear-gradient(135deg, 
+    var(--color-palkia-400) 0%, 
+    var(--color-palkia-500) 25%, 
+    var(--color-pearl-500) 50%,
+    var(--color-palkia-500) 75%, 
+    var(--color-palkia-400) 100%
+  );
+  background-size: 200% 200%;
+  animation: iridescent 6s ease infinite;
+}
+
+.palkia-gradient-text {
+  background: linear-gradient(135deg, 
+    var(--color-palkia-500) 0%, 
+    var(--color-pearl-500) 50%,
+    var(--color-palkia-500) 100%
+  );
+  background-size: 200% 200%;
+  animation: iridescent 4s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  pointer-events: none;
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+.dark .glass {
+  background: rgba(24, 24, 27, 0.7);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+/* Pearl/Iridescent button effect */
+.btn-palkia {
+  background: linear-gradient(135deg, 
+    var(--color-palkia-500) 0%, 
+    var(--color-pearl-500) 100%
+  );
+  box-shadow: var(--shadow-palkia);
+  transition: all 0.3s ease;
+}
+
+.btn-palkia:hover {
+  background: linear-gradient(135deg, 
+    var(--color-palkia-600) 0%, 
+    var(--color-pearl-600) 100%
+  );
+  box-shadow: var(--shadow-palkia-lg);
+  transform: translateY(-1px);
+}
+
+/* Card hover effect with palkia glow */
+.card-palkia {
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+}
+
+.card-palkia:hover {
+  border-color: var(--color-palkia-300);
+  box-shadow: var(--shadow-palkia);
+}
+
+.dark .card-palkia:hover {
+  border-color: var(--color-palkia-700);
+}
+
+/* Focus ring with palkia color */
+.focus-palkia:focus-visible {
+  outline: 2px solid var(--color-palkia-500);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-silver-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-palkia-400);
+}
+
+/* Selection color */
+::selection {
+  background: var(--color-palkia-200);
+  color: var(--color-palkia-900);
+}
+
+.dark ::selection {
+  background: var(--color-palkia-800);
+  color: var(--color-palkia-100);
 }
