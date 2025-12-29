@@ -85,9 +85,12 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   const [activeTab, setActiveTab] = useState("sources");
   const [isAddSourceOpen, setIsAddSourceOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [sourceUrl, setSourceUrl] = useState("");
 
   const detectedSourceType = sourceUrl ? detectYouTubeSourceType(sourceUrl) : null;
+  const hasCompletedVideos = videos?.some(v => v.status === "completed");
+  const isIngesting = videos?.some(v => ["pending", "downloading", "transcribing", "processing"].includes(v.status));
   
   const handleAddSource = async () => {
     if (!sourceUrl.trim()) return;
@@ -102,6 +105,15 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   };
 
   const handleRunPipeline = async () => {
+    if (isIngesting) {
+      setIsWarningOpen(true);
+      return;
+    }
+    await runPipelineMutation.mutateAsync(id);
+  };
+
+  const confirmRunPipeline = async () => {
+    setIsWarningOpen(false);
     await runPipelineMutation.mutateAsync(id);
   };
 
@@ -212,8 +224,9 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
               <Button 
                 variant="gradient"
                 onClick={handleRunPipeline}
-                disabled={isPipelineRunning || !videos?.length}
+                disabled={isPipelineRunning || !hasCompletedVideos}
                 className="gap-2"
+                title={!hasCompletedVideos ? "At least one video must be completed" : ""}
               >
                 {isPipelineRunning ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -406,6 +419,28 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
                 <Trash2 className="mr-2 h-4 w-4" />
               )}
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isWarningOpen} onOpenChange={setIsWarningOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Processing in Progress</DialogTitle>
+            <DialogDescription>
+              Some videos are still being processed (downloading or transcribing). 
+              The pipeline will only use videos that have been fully completed.
+              
+              Do you want to proceed with the available completed videos?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsWarningOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="gradient" onClick={confirmRunPipeline}>
+              Proceed Anyway
             </Button>
           </DialogFooter>
         </DialogContent>

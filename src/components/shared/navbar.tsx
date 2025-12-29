@@ -32,7 +32,13 @@ export function Navbar() {
           </Button>
 
           <Link href="/" className="flex items-center gap-2">
-            <PalkiaSvg size={36} className="drop-shadow-md" />
+            <img 
+              src="https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-black-and-white/5/50/Pokemans_484.gif?width=325&dpr=2" 
+              alt="Palkia Logo" 
+              width={48} 
+              height={48} 
+              className="drop-shadow-md object-contain -my-2"
+            />
             <span className="palkia-gradient-text text-xl font-bold tracking-tight">
               {siteConfig.name}
             </span>
