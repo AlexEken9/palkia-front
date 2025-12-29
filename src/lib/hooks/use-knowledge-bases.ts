@@ -100,7 +100,7 @@ export function useVideos(kbId: string) {
     queryKey: ["videos", kbId],
     queryFn: async () => {
       const { data } = await knowledgeBasesApi.getVideos(kbId);
-      return data;
+      return data.items;
     },
     enabled: !!kbId && isValidUUID(kbId),
   });
@@ -183,7 +183,7 @@ export function useConcepts(kbId: string, limit = 100, includeOrigin = true) {
     queryKey: ["concepts", kbId, limit, includeOrigin],
     queryFn: async () => {
       const { data } = await knowledgeBasesApi.getConcepts(kbId, limit, includeOrigin);
-      return data;
+      return data.items;
     },
     enabled: !!kbId && isValidUUID(kbId),
   });
@@ -194,7 +194,7 @@ export function useEntities(kbId: string, limit = 100, includeOrigin = true) {
     queryKey: ["entities", kbId, limit, includeOrigin],
     queryFn: async () => {
       const { data } = await knowledgeBasesApi.getEntities(kbId, limit, includeOrigin);
-      return data;
+      return data.items;
     },
     enabled: !!kbId && isValidUUID(kbId),
   });

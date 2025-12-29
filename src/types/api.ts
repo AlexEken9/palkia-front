@@ -228,3 +228,11 @@ export interface ReportMarkdown {
   markdown_content: string;
   created_at: string;
 }
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  skip: number;
+  limit: number;
+  has_more: boolean;
+}
