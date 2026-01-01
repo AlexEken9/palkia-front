@@ -46,9 +46,6 @@ export const knowledgeBasesApi = {
   getProcessingStatus: (kbId: string) =>
     apiClient.get<ProcessingStatusResponse>(`/knowledge-bases/${kbId}/status`),
   
-  startExtraction: (kbId: string, options?: { batch_size?: number; reprocess?: boolean }) =>
-    apiClient.post<ExtractionStatus>(`/knowledge-bases/${kbId}/extract`, options || {}),
-  
   getExtractionStatus: (kbId: string) =>
     apiClient.get<ExtractionStatus>(`/knowledge-bases/${kbId}/extraction-status`),
   

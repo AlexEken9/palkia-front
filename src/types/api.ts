@@ -65,6 +65,7 @@ export interface ContentStatusCounts {
   downloading: number;
   transcribing: number;
   processing: number;
+  extracting: number;
   completed: number;
   failed: number;
 }
@@ -79,12 +80,18 @@ export interface SourceIngestionStatus {
   source_id: string;
   source_type: string;
   title: string | null;
-  status: "fetching_metadata" | "processing" | "completed" | "failed";
+  status: "fetching_metadata" | "processing" | "extracting" | "completed" | "failed";
   progress_percent: number;
   current_stage: string;
   message: string | null;
   media: ContentStatusCounts;
   current_item: CurrentContentInfo | null;
+}
+
+export interface MediaProgressInfo {
+  stage: string;
+  percent: number;
+  message: string | null;
 }
 
 export interface MediaContent {
@@ -99,8 +106,10 @@ export interface MediaContent {
   thumbnail_url: string | null;
   language: string | null;
   status: ProcessingStatus;
+  error_message: string | null;
   created_at: string;
   processed_at: string | null;
+  progress: MediaProgressInfo | null;
 }
 
 export interface ProcessingStatusResponse {
@@ -156,14 +165,17 @@ export interface ExtractionStatus {
   status: "pending" | "in_progress" | "completed" | "failed";
 }
 
-export const PROCESSING_STATUS_LABELS: Record<ProcessingStatus, string> = {
-  pending: "En cola...",
-  downloading: "Descargando...",
-  transcribing: "Transcribiendo...",
-  processing: "Procesando...",
-  extracting: "Extrayendo...",
-  completed: "Completado",
-  failed: "Error",
+export const PROCESSING_STATUS_CONFIG: Record<
+  ProcessingStatus,
+  { label: string; progress: number; color: string }
+> = {
+  pending: { label: "Queued", progress: 0, color: "slate" },
+  downloading: { label: "Downloading", progress: 20, color: "blue" },
+  transcribing: { label: "Transcribing", progress: 40, color: "amber" },
+  processing: { label: "Processing", progress: 60, color: "purple" },
+  extracting: { label: "Extracting", progress: 80, color: "pink" },
+  completed: { label: "Completed", progress: 100, color: "green" },
+  failed: { label: "Failed", progress: 0, color: "red" },
 };
 
 export function isTerminalStatus(status: ProcessingStatus): boolean {

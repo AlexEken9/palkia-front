@@ -21,12 +21,10 @@ import {
   ListVideo,
   User,
   Clock,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
   RefreshCw,
   Trash2,
-  Filter
+  Filter,
 } from "lucide-react";
 import { 
   Button, 
@@ -48,7 +46,8 @@ import {
   Progress,
   Skeleton,
 } from "@/components/ui";
-import { Navbar, Sidebar, MediaStatusBadge } from "@/components/shared";
+import { Navbar, Sidebar } from "@/components/shared";
+import { MediaProgressBar } from "@/components/shared/media-status-card";
 import { 
   useKnowledgeBase, 
   useSources, 
@@ -63,7 +62,7 @@ import {
   useRetryMedia,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
-import type { Source, MediaContent, ProcessingStatus } from "@/types";
+import type { Source, MediaContent } from "@/types";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -454,6 +453,7 @@ function SourcesTab({
           key={source.id} 
           source={source} 
           mediaItems={mediaBySourceId[source.id] ?? []}
+          kbId={kbId}
           onDelete={() => onDeleteSource(source.id)}
           isDeleting={isDeletingSource}
         />
@@ -465,17 +465,19 @@ function SourcesTab({
 function SourceCard({ 
   source, 
   mediaItems, 
+  kbId,
   onDelete,
   isDeleting
 }: { 
   source: Source; 
   mediaItems: MediaContent[]; 
+  kbId: string;
   onDelete: () => void;
   isDeleting: boolean;
 }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { data: ingestionStatus } = useSourceIngestionStatus(source.id);
+  const { data: ingestionStatus } = useSourceIngestionStatus(source.id, kbId);
   
   const isMetadataLoading = !source.title;
 
@@ -485,13 +487,13 @@ function SourceCard({
       pending: mediaItems.filter(v => v.status === "pending").length,
       downloading: mediaItems.filter(v => v.status === "downloading").length,
       transcribing: mediaItems.filter(v => v.status === "transcribing").length,
-      processing: mediaItems.filter(v => ["processing", "extracting"].includes(v.status)).length,
+      processing: mediaItems.filter(v => v.status === "processing").length,
+      extracting: mediaItems.filter(v => v.status === "extracting").length,
       completed: mediaItems.filter(v => v.status === "completed").length,
       failed: mediaItems.filter(v => v.status === "failed").length,
     };
   }, [mediaItems]);
 
-  const activeProcessingCount = stats.downloading + stats.transcribing + stats.processing;
   const progressPercent = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
 
   const handleDelete = () => {
@@ -500,13 +502,14 @@ function SourceCard({
   };
 
   const getIngestionMessage = () => {
-    if (isMetadataLoading) return "Extracting metadata...";
+    if (isMetadataLoading) return "Fetching metadata...";
     if (!ingestionStatus) return null;
     return ingestionStatus.message;
   };
 
   const ingestionMessage = getIngestionMessage();
-  const showIngestionStatus = isMetadataLoading || (ingestionStatus && ingestionStatus.status === "processing");
+  const isActive = ingestionStatus && ["processing", "extracting", "fetching_metadata"].includes(ingestionStatus.status);
+  const showIngestionStatus = isMetadataLoading || isActive;
   
   return (
     <>
@@ -564,7 +567,7 @@ function SourceCard({
             <div className="flex items-center justify-between text-sm">
               <span className="text-silver-500">Progress</span>
               <span className="font-medium text-silver-900 dark:text-silver-100">
-                {stats.completed} / {stats.total} Items
+                {stats.completed} / {stats.total} completed
               </span>
             </div>
             
@@ -576,18 +579,35 @@ function SourceCard({
                   {stats.pending} Pending
                 </Badge>
               )}
-              {activeProcessingCount > 0 && (
-                <Badge variant="outline" className="bg-pearl-100 text-pearl-700 animate-pulse border-pearl-200">
-                  {activeProcessingCount} Processing
+              {stats.downloading > 0 && (
+                <Badge variant="outline" className="bg-blue-100 text-blue-700 animate-pulse border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
+                  {stats.downloading} Downloading
+                </Badge>
+              )}
+              {stats.transcribing > 0 && (
+                <Badge variant="outline" className="bg-amber-100 text-amber-700 animate-pulse border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
+                  {stats.transcribing} Transcribing
+                </Badge>
+              )}
+              {stats.processing > 0 && (
+                <Badge variant="outline" className="bg-purple-100 text-purple-700 animate-pulse border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800">
+                  {stats.processing} Processing
+                </Badge>
+              )}
+              {stats.extracting > 0 && (
+                <Badge variant="outline" className="bg-pink-100 text-pink-700 animate-pulse border-pink-200 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800">
+                  {stats.extracting} Extracting
+                </Badge>
+              )}
+              {stats.completed > 0 && (
+                <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                  {stats.completed} Completed
                 </Badge>
               )}
               {stats.failed > 0 && (
                 <Badge variant="destructive" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 hover:text-red-700">
                   {stats.failed} Failed
                 </Badge>
-              )}
-              {stats.completed === stats.total && stats.total > 0 && (
-                <Badge className="bg-palkia-100 text-palkia-700 hover:bg-palkia-200 border-none">All Completed</Badge>
               )}
             </div>
 
@@ -605,56 +625,9 @@ function SourceCard({
                 </Button>
 
                 {isExpanded && (
-                  <div className="mt-3 space-y-2 border-t border-silver-100 dark:border-silver-800 pt-3 animate-in slide-in-from-top-2 duration-200">
+                  <div className="mt-3 space-y-3 border-t border-silver-100 dark:border-silver-800 pt-3 animate-in slide-in-from-top-2 duration-200">
                     {mediaItems.map((item) => (
-                      <div 
-                        key={item.id} 
-                        className="group flex gap-3 p-2 rounded-lg hover:bg-silver-50 dark:hover:bg-silver-900/50 transition-colors"
-                      >
-                        {item.thumbnail_url ? (
-                          <div className="relative shrink-0">
-                            <img 
-                              src={item.thumbnail_url} 
-                              alt={item.title}
-                              className="h-12 w-20 rounded object-cover border border-silver-200 dark:border-silver-700"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity rounded">
-                              <Play className="h-4 w-4 text-white fill-white" />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="h-12 w-20 shrink-0 rounded bg-silver-100 dark:bg-silver-800 flex items-center justify-center border border-silver-200 dark:border-silver-700">
-                            <Video className="h-4 w-4 text-silver-400" />
-                          </div>
-                        )}
-                        
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                          <h5 className="text-sm font-medium text-silver-900 dark:text-silver-100 truncate" title={item.title}>
-                            {item.title}
-                          </h5>
-                          
-                          <div className="flex items-center gap-2 text-xs text-silver-500">
-                            {item.duration_seconds && (
-                              <span className="flex items-center gap-0.5">
-                                <Clock className="h-3 w-3" />
-                                {formatDuration(item.duration_seconds)}
-                              </span>
-                            )}
-                            <MediaStatusBadge status={item.status} />
-                          </div>
-                        </div>
-
-                        {item.platform === "youtube" && (
-                          <a 
-                            href={`https://youtube.com/watch?v=${item.remote_id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="shrink-0 self-start text-silver-400 hover:text-palkia-500 p-1"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
-                      </div>
+                      <MediaItemCard key={item.id} item={item} kbId={kbId} />
                     ))}
                   </div>
                 )}
@@ -696,13 +669,83 @@ function SourceCard({
   );
 }
 
-function MediaTab({ mediaItems, kbId }: { mediaItems: MediaContent[]; kbId: string }) {
-  const safeItems = Array.isArray(mediaItems) ? mediaItems : [];
+function MediaItemCard({ item, kbId }: { item: MediaContent; kbId: string }) {
   const retryMutation = useRetryMedia();
 
-  const handleRetry = async (mediaId: string) => {
-    await retryMutation.mutateAsync({ kbId, mediaId });
-  };
+  return (
+    <div className="group rounded-xl border border-silver-200/60 dark:border-silver-800 p-4 bg-white/60 dark:bg-silver-900/40 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-silver-900/60 transition-colors shadow-sm">
+      <div className="flex gap-4 items-center">
+        {item.thumbnail_url ? (
+          <div className="relative shrink-0 self-center">
+            <img 
+              src={item.thumbnail_url} 
+              alt={item.title}
+              className="h-16 w-28 rounded-md object-cover border border-silver-200 dark:border-silver-700"
+            />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity rounded-md">
+              <Play className="h-5 w-5 text-white fill-white" />
+            </div>
+          </div>
+        ) : (
+          <div className="h-16 w-28 shrink-0 self-center rounded-md bg-silver-100 dark:bg-silver-800 flex items-center justify-center border border-silver-200 dark:border-silver-700">
+            <Video className="h-5 w-5 text-silver-400" />
+          </div>
+        )}
+        
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex items-start justify-between gap-2">
+            <h5 className="text-sm font-medium text-silver-900 dark:text-silver-100 truncate" title={item.title}>
+              {item.title}
+            </h5>
+            <div className="flex items-center gap-1 shrink-0">
+              {item.status === "failed" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => retryMutation.mutateAsync({ kbId, mediaId: item.id })}
+                  disabled={retryMutation.isPending}
+                  className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                >
+                  <RefreshCw className={`h-3 w-3 ${retryMutation.isPending ? "animate-spin" : ""}`} />
+                </Button>
+              )}
+              {item.platform === "youtube" && (
+                <a 
+                  href={`https://youtube.com/watch?v=${item.remote_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-silver-400 hover:text-palkia-500 p-1"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 text-xs text-silver-500 mt-0.5 mb-1.5">
+            {item.duration_seconds && (
+              <span className="flex items-center gap-0.5">
+                <Clock className="h-3 w-3" />
+                {formatDuration(item.duration_seconds)}
+              </span>
+            )}
+          </div>
+          
+          <MediaProgressBar status={item.status} progress={item.progress} />
+          
+          {item.status === "failed" && item.error_message && (
+            <div className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded px-2 py-1 truncate" title={item.error_message}>
+              {item.error_message}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MediaTab({ mediaItems, kbId }: { mediaItems: MediaContent[]; kbId: string }) {
+  const safeItems = Array.isArray(mediaItems) ? mediaItems : [];
 
   if (safeItems.length === 0) {
     return (
@@ -723,68 +766,9 @@ function MediaTab({ mediaItems, kbId }: { mediaItems: MediaContent[]; kbId: stri
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {safeItems.map((item) => (
-        <Card key={item.id} className="glass-card">
-          <CardContent className="py-3">
-            <div className="flex items-center gap-4">
-              {item.thumbnail_url ? (
-                <img 
-                  src={item.thumbnail_url} 
-                  alt={item.title}
-                  className="h-16 w-28 rounded object-cover"
-                />
-              ) : (
-                <div className="h-16 w-28 rounded bg-silver-200 dark:bg-silver-700 flex items-center justify-center">
-                  <Video className="h-6 w-6 text-silver-400" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate">
-                  {item.title}
-                </h4>
-                <div className="mt-1 flex items-center gap-3 text-xs text-silver-500">
-                  {item.duration_seconds && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatDuration(item.duration_seconds)}
-                    </span>
-                  )}
-                  {item.upload_date && (
-                    <span>{formatDate(item.upload_date)}</span>
-                  )}
-                </div>
-              </div>
-              <MediaStatusBadge status={item.status} />
-              {item.status === "failed" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRetry(item.id)}
-                  disabled={retryMutation.isPending}
-                  className="shrink-0 text-xs h-7 px-2 gap-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
-                >
-                  {retryMutation.isPending ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-3 w-3" />
-                  )}
-                  Retry
-                </Button>
-              )}
-              {item.platform === "youtube" && (
-                <a 
-                  href={`https://youtube.com/watch?v=${item.remote_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-silver-400 hover:text-palkia-500"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <MediaItemCard key={item.id} item={item} kbId={kbId} />
       ))}
     </div>
   );
@@ -821,7 +805,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               No concepts extracted yet
             </h3>
             <p className="mt-1 text-sm text-silver-500">
-              Wait for processing to complete to see extracted concepts
+              Concepts will appear here once media processing completes
             </p>
           </div>
         </CardContent>
@@ -986,7 +970,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               No entities extracted yet
             </h3>
             <p className="mt-1 text-sm text-silver-500">
-              Wait for processing to complete to see extracted entities
+              Entities will appear here once media processing completes
             </p>
           </div>
         </CardContent>

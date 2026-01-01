@@ -22,6 +22,7 @@ export function useKnowledgeBase(id: string) {
       return data;
     },
     enabled: !!id && isValidUUID(id),
+    refetchInterval: 5000,
   });
 }
 
@@ -70,6 +71,7 @@ export function useSources(kbId: string) {
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
+    refetchInterval: 5000,
   });
 }
 
@@ -117,7 +119,9 @@ export function useDeleteSource() {
   });
 }
 
-export function useSourceIngestionStatus(sourceId: string) {
+export function useSourceIngestionStatus(sourceId: string, kbId?: string) {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: ["source-ingestion", sourceId],
     queryFn: async () => {
@@ -127,13 +131,26 @@ export function useSourceIngestionStatus(sourceId: string) {
     enabled: !!sourceId,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (data?.status === "completed" || data?.status === "failed") return false;
-      return 2000;
+      
+      if (data?.status === "completed" || data?.status === "failed") {
+        if (kbId) {
+          queryClient.invalidateQueries({ queryKey: ["sources", kbId] });
+          queryClient.invalidateQueries({ queryKey: ["media", kbId] });
+          queryClient.invalidateQueries({ queryKey: ["extraction-status", kbId] });
+          queryClient.invalidateQueries({ queryKey: ["concepts"] });
+          queryClient.invalidateQueries({ queryKey: ["entities"] });
+          queryClient.invalidateQueries({ queryKey: ["knowledge-bases", kbId] });
+        }
+        return false;
+      }
+      return 1500;
     },
   });
 }
 
 export function useMedia(kbId: string) {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: ["media", kbId],
     queryFn: async () => {
@@ -141,6 +158,22 @@ export function useMedia(kbId: string) {
       return data.items;
     },
     enabled: !!kbId && isValidUUID(kbId),
+    refetchInterval: (query) => {
+      const items = query.state.data;
+      if (!items || items.length === 0) return 5000;
+      
+      const hasActive = items.some((item: { status: string }) => 
+        ["pending", "downloading", "transcribing", "processing", "extracting"].includes(item.status)
+      );
+      
+      if (!hasActive) {
+        queryClient.invalidateQueries({ queryKey: ["concepts"] });
+        queryClient.invalidateQueries({ queryKey: ["entities"] });
+        queryClient.invalidateQueries({ queryKey: ["knowledge-bases", kbId] });
+      }
+      
+      return hasActive ? 2000 : 5000;
+    },
   });
 }
 
@@ -168,6 +201,7 @@ export function useExtractionStatus(kbId: string) {
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
+    refetchInterval: 5000,
   });
 }
 
@@ -180,6 +214,7 @@ export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, m
     },
     enabled: !!kbId && isValidUUID(kbId),
     placeholderData: (previousData) => previousData,
+    refetchInterval: 5000,
   });
 }
 
@@ -192,6 +227,7 @@ export function useEntities(kbId: string, page = 1, limit = 20, type?: string, m
     },
     enabled: !!kbId && isValidUUID(kbId),
     placeholderData: (previousData) => previousData,
+    refetchInterval: 5000,
   });
 }
 
@@ -207,10 +243,10 @@ export function useRetryMedia() {
       queryClient.invalidateQueries({ queryKey: ["media", kbId] });
       queryClient.invalidateQueries({ queryKey: ["source-ingestion"] });
       queryClient.invalidateQueries({ queryKey: ["processing-status", kbId] });
-      toast.success("Reintento iniciado");
+      toast.success("Retry started");
     },
     onError: (error: Error) => {
-      toast.error("Error al reintentar");
+      toast.error("Retry failed");
       console.error(error);
     },
   });
