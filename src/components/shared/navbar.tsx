@@ -27,7 +27,7 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="lg:hidden text-silver-500 hover:text-palkia-500"
+            className="lg:hidden text-muted-foreground hover:text-palkia-500"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -56,7 +56,7 @@ export function Navbar() {
               size="icon"
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
-              className="rounded-full hover:bg-palkia-50 dark:hover:bg-palkia-900/30 text-silver-500 dark:text-silver-400 hover:text-palkia-500 dark:hover:text-palkia-300 transition-colors"
+              className="rounded-full hover:bg-palkia-50 dark:hover:bg-palkia-900/30 text-muted-foreground hover:text-palkia-500 dark:hover:text-palkia-300 transition-colors"
             >
               {resolvedTheme === "dark" ? (
                 <Sun className="h-5 w-5" />

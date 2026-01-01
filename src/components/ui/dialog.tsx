@@ -146,8 +146,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
           ref={ref}
           className={cn(
             "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
-            "rounded-xl border border-silver-200 bg-white p-6 shadow-xl",
-            "dark:border-silver-800 dark:bg-silver-900",
+            "rounded-xl border border-border bg-card p-6 shadow-xl",
             "duration-200 animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%]",
             className
           )}
@@ -203,7 +202,7 @@ const DialogTitle = React.forwardRef<HTMLHeadingElement, DialogTitleProps>(
   ({ className, ...props }, ref) => (
     <h2
       ref={ref}
-      className={cn("text-lg font-semibold leading-none tracking-tight text-silver-900 dark:text-silver-100", className)}
+      className={cn("text-lg font-semibold leading-none tracking-tight text-foreground", className)}
       {...props}
     />
   )
@@ -216,7 +215,7 @@ const DialogDescription = React.forwardRef<HTMLParagraphElement, DialogDescripti
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn("text-sm text-silver-500 dark:text-silver-400", className)}
+      className={cn("text-sm text-muted-foreground", className)}
       {...props}
     />
   )

@@ -64,11 +64,11 @@ function StageIndicator({ stage, currentStage, stagePercent }: StageIndicatorPro
         icon: "text-palkia-600 dark:text-palkia-400",
       };
     }
-    return {
-      ring: "ring-pearl-300 dark:ring-pearl-700",
-      bg: "bg-pearl-100 dark:bg-pearl-900",
-      icon: "text-pearl-400 dark:text-pearl-600",
-    };
+return {
+        ring: "ring-muted-foreground/30",
+        bg: "bg-muted",
+        icon: "text-muted-foreground",
+      };
   };
 
   const colors = getColors();
@@ -81,7 +81,7 @@ function StageIndicator({ stage, currentStage, stagePercent }: StageIndicatorPro
           relative z-10 w-9 h-9 rounded-full flex items-center justify-center
           ring-2 ${colors.ring} ${colors.bg}
           transition-all duration-300
-          ${isCurrent ? "ring-offset-2 ring-offset-pearl-50 dark:ring-offset-space-950" : ""}
+          ${isCurrent ? "ring-offset-2 ring-offset-background" : ""}
         `}
       >
         {isCompleted ? (
@@ -125,7 +125,7 @@ function StageIndicator({ stage, currentStage, stagePercent }: StageIndicatorPro
           text-[10px] font-semibold whitespace-nowrap leading-tight
           ${isCompleted ? "text-emerald-600 dark:text-emerald-400" : ""}
           ${isCurrent ? "text-palkia-600 dark:text-palkia-400" : ""}
-          ${isPending ? "text-pearl-400 dark:text-pearl-600" : ""}
+          ${isPending ? "text-muted-foreground" : ""}
         `}>
           {STATUS_LABELS[stage]}
         </span>
@@ -171,9 +171,9 @@ export function MediaProgressBar({ status, progress }: MediaProgressBarProps) {
 
   if (status === "pending") {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-pearl-100 dark:bg-pearl-900/50 border border-pearl-200 dark:border-pearl-800">
-        <Clock className="h-4 w-4 text-pearl-400 animate-pulse" />
-        <span className="text-xs font-medium text-pearl-500 dark:text-pearl-400">Queued</span>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border">
+        <Clock className="h-4 w-4 text-muted-foreground animate-pulse" />
+        <span className="text-xs font-medium text-muted-foreground">Queued</span>
       </div>
     );
   }
@@ -181,7 +181,7 @@ export function MediaProgressBar({ status, progress }: MediaProgressBarProps) {
   const currentStageIndex = PIPELINE_STAGES.indexOf(status);
 
   return (
-    <div className="px-3 py-3 rounded-lg bg-pearl-50 dark:bg-space-950/50 border border-pearl-200 dark:border-pearl-800">
+    <div className="px-3 py-3 rounded-lg bg-muted/50 border border-border">
       <div className="flex items-start justify-between gap-1">
         {PIPELINE_STAGES.map((stage, index) => (
           <div key={stage} className="flex items-center flex-1 last:flex-none">
@@ -198,8 +198,8 @@ export function MediaProgressBar({ status, progress }: MediaProgressBarProps) {
                   ${index < currentStageIndex 
                     ? "bg-emerald-500" 
                     : index === currentStageIndex 
-                      ? "bg-gradient-to-r from-palkia-500 to-pearl-300 dark:to-pearl-700"
-                      : "bg-pearl-200 dark:bg-pearl-800"
+                      ? "bg-gradient-to-r from-palkia-500 to-muted-foreground/30"
+                      : "bg-muted"
                   }
                 `} />
               </div>

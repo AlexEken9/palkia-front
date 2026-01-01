@@ -32,17 +32,17 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-silver-50 dark:bg-silver-950">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <Sidebar />
       
       <main className="lg:pl-64 pt-16">
         <div className="p-6 lg:p-8 max-w-3xl">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-silver-900 dark:text-silver-100">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Settings
             </h1>
-            <p className="mt-1 text-silver-500 dark:text-silver-400">
+            <p className="mt-1 text-muted-foreground">
               Manage your preferences and configuration
             </p>
           </div>
@@ -68,16 +68,16 @@ export default function SettingsPage() {
                             "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all",
                             theme === value
                               ? "border-palkia-500 bg-palkia-50 dark:bg-palkia-900/20"
-                              : "border-silver-200 hover:border-silver-300 dark:border-silver-700 dark:hover:border-silver-600"
+                              : "border-border hover:border-muted-foreground"
                           )}
                         >
                           <Icon className={cn(
                             "h-6 w-6",
-                            theme === value ? "text-palkia-500" : "text-silver-500"
+                            theme === value ? "text-palkia-500" : "text-muted-foreground"
                           )} />
                           <span className={cn(
                             "text-sm font-medium",
-                            theme === value ? "text-palkia-700 dark:text-palkia-300" : "text-silver-600 dark:text-silver-400"
+                            theme === value ? "text-palkia-700 dark:text-palkia-300" : "text-muted-foreground"
                           )}>
                             {label}
                           </span>
@@ -107,9 +107,9 @@ export default function SettingsPage() {
                       id="api-url"
                       value={apiConfig.baseUrl}
                       disabled
-                      className="bg-silver-100 dark:bg-silver-800"
+                      className="bg-muted"
                     />
-                    <p className="text-xs text-silver-500">
+                    <p className="text-xs text-muted-foreground">
                       Set via NEXT_PUBLIC_API_URL environment variable
                     </p>
                   </div>
@@ -119,7 +119,7 @@ export default function SettingsPage() {
                       id="api-version"
                       value={apiConfig.version}
                       disabled
-                      className="bg-silver-100 dark:bg-silver-800"
+                      className="bg-muted"
                     />
                   </div>
                 </div>
@@ -136,15 +136,15 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-silver-500">Application</span>
-                    <span className="font-medium text-silver-900 dark:text-silver-100">{siteConfig.name}</span>
+                    <span className="text-muted-foreground">Application</span>
+                    <span className="font-medium text-foreground">{siteConfig.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-silver-500">Version</span>
-                    <span className="font-medium text-silver-900 dark:text-silver-100">{siteConfig.version}</span>
+                    <span className="text-muted-foreground">Version</span>
+                    <span className="font-medium text-foreground">{siteConfig.version}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-silver-500">GitHub</span>
+                    <span className="text-muted-foreground">GitHub</span>
                     <a 
                       href={siteConfig.links.github}
                       target="_blank"

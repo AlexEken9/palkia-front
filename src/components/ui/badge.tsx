@@ -10,11 +10,11 @@ const badgeVariants = cva(
         default:
           "border-transparent bg-gradient-to-r from-palkia-500 to-palkia-600 text-white shadow-sm shadow-palkia-500/20",
         secondary:
-          "border-transparent bg-silver-100 text-silver-900 dark:bg-silver-800 dark:text-silver-100",
+          "border-transparent bg-secondary text-secondary-foreground",
         destructive:
           "border-transparent bg-red-500 text-white shadow-sm shadow-red-500/20",
         outline:
-          "text-silver-700 dark:text-silver-300 border-silver-300 dark:border-silver-700",
+          "text-muted-foreground border-border",
         success:
           "border-transparent bg-green-500/15 text-green-700 dark:text-green-400",
         warning:
@@ -22,9 +22,9 @@ const badgeVariants = cva(
         palkia:
           "border-transparent bg-palkia-500/15 text-palkia-700 dark:text-palkia-300 border border-palkia-200 dark:border-palkia-800",
         pearl:
-          "border-transparent bg-pearl-500/15 text-pearl-700 dark:text-pearl-300",
+          "border-transparent bg-muted text-muted-foreground",
         glass:
-          "border-white/20 bg-white/30 backdrop-blur-sm text-silver-900 dark:text-silver-100 dark:bg-white/10",
+          "border-border/20 bg-card/30 backdrop-blur-sm text-foreground",
       },
     },
     defaultVariants: {
