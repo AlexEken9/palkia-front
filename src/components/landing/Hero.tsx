@@ -7,7 +7,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-const PALKIA_GIF = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-black-and-white/5/50/Pokemans_484.gif?width=325&dpr=2";
+const PALKIA_GIF = "https://play.pokemonshowdown.com/sprites/ani/palkia.gif";
 const PALKIA_CRY = "https://play.pokemonshowdown.com/audio/cries/palkia.mp3";
 
 const GRID_PATTERN = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.2)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e")`;
