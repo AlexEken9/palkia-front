@@ -83,7 +83,7 @@ export function useAddSource() {
     },
     onSuccess: (_, { kbId }) => {
       queryClient.invalidateQueries({ queryKey: ["sources", kbId] });
-      queryClient.invalidateQueries({ queryKey: ["videos", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["media", kbId] });
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases", kbId] });
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
       toast.success("Source added successfully");
@@ -105,7 +105,7 @@ export function useDeleteSource() {
     },
     onSuccess: (_, { kbId }) => {
       queryClient.invalidateQueries({ queryKey: ["sources", kbId] });
-      queryClient.invalidateQueries({ queryKey: ["videos", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["media", kbId] });
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases", kbId] });
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
       toast.success("Source deleted");
@@ -133,11 +133,11 @@ export function useSourceIngestionStatus(sourceId: string) {
   });
 }
 
-export function useVideos(kbId: string) {
+export function useMedia(kbId: string) {
   return useQuery({
-    queryKey: ["videos", kbId],
+    queryKey: ["media", kbId],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getVideos(kbId);
+      const { data } = await knowledgeBasesApi.getMedia(kbId);
       return data.items;
     },
     enabled: !!kbId && isValidUUID(kbId),
@@ -160,42 +160,6 @@ export function useProcessingStatus(kbId: string) {
   });
 }
 
-export function usePipelineStatus(kbId: string) {
-  return useQuery({
-    queryKey: ["pipeline-status", kbId],
-    queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getPipelineStatus(kbId);
-      return data;
-    },
-    enabled: !!kbId && isValidUUID(kbId),
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (data?.status === "processing") return 2000;
-      if (data?.status === "completed") return false;
-      return 5000;
-    },
-  });
-}
-
-export function useRunPipeline() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (kbId: string) => {
-      const response = await knowledgeBasesApi.runPipeline(kbId);
-      return response.data;
-    },
-    onSuccess: (_, kbId) => {
-      queryClient.invalidateQueries({ queryKey: ["pipeline-status", kbId] });
-      toast.success("Pipeline started");
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to start pipeline");
-      console.error(error);
-    },
-  });
-}
-
 export function useExtractionStatus(kbId: string) {
   return useQuery({
     queryKey: ["extraction-status", kbId],
@@ -207,11 +171,11 @@ export function useExtractionStatus(kbId: string) {
   });
 }
 
-export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) {
+export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, mediaId?: string, includeOrigin = true) {
   return useQuery({
-    queryKey: ["concepts", kbId, page, limit, type, videoId, includeOrigin],
+    queryKey: ["concepts", kbId, page, limit, type, mediaId, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getConcepts(kbId, page, limit, type, videoId, includeOrigin);
+      const { data } = await knowledgeBasesApi.getConcepts(kbId, page, limit, type, mediaId, includeOrigin);
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
@@ -219,36 +183,14 @@ export function useConcepts(kbId: string, page = 1, limit = 20, type?: string, v
   });
 }
 
-export function useEntities(kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) {
+export function useEntities(kbId: string, page = 1, limit = 20, type?: string, mediaId?: string, includeOrigin = true) {
   return useQuery({
-    queryKey: ["entities", kbId, page, limit, type, videoId, includeOrigin],
+    queryKey: ["entities", kbId, page, limit, type, mediaId, includeOrigin],
     queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getEntities(kbId, page, limit, type, videoId, includeOrigin);
+      const { data } = await knowledgeBasesApi.getEntities(kbId, page, limit, type, mediaId, includeOrigin);
       return data;
     },
     enabled: !!kbId && isValidUUID(kbId),
     placeholderData: (previousData) => previousData,
-  });
-}
-
-export function useConsolidatedIdeas(kbId: string, limit = 50) {
-  return useQuery({
-    queryKey: ["consolidated-ideas", kbId, limit],
-    queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getConsolidatedIdeas(kbId, limit);
-      return data;
-    },
-    enabled: !!kbId && isValidUUID(kbId),
-  });
-}
-
-export function useTemporalPatterns(kbId: string) {
-  return useQuery({
-    queryKey: ["temporal-patterns", kbId],
-    queryFn: async () => {
-      const { data } = await knowledgeBasesApi.getTemporalPatterns(kbId);
-      return data;
-    },
-    enabled: !!kbId && isValidUUID(kbId),
   });
 }

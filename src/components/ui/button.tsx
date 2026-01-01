@@ -3,22 +3,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palkia-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palkia-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-palkia-500 text-white shadow-lg shadow-palkia-500/25 hover:bg-palkia-600 hover:shadow-xl hover:shadow-palkia-500/30",
-        gradient:
-          "bg-gradient-to-r from-palkia-500 to-pearl-500 text-white shadow-lg shadow-palkia-500/25 hover:from-palkia-600 hover:to-pearl-600",
+          "btn-palkia text-white",
+        glass:
+          "glass hover:bg-white/20 hover:border-palkia-300 text-foreground dark:text-white dark:hover:bg-white/10",
         destructive:
-          "bg-red-500 text-white shadow-sm hover:bg-red-600",
+          "bg-red-500/80 text-white shadow-sm hover:bg-red-600 backdrop-blur-sm",
         outline:
-          "border border-silver-300 bg-transparent hover:bg-silver-100 hover:border-palkia-300 dark:border-silver-700 dark:hover:bg-silver-800",
+          "border border-silver-300/50 bg-transparent hover:bg-palkia-50 hover:border-palkia-300 dark:border-silver-700/50 dark:hover:bg-palkia-900/20 text-foreground",
         secondary:
-          "bg-silver-100 text-silver-900 hover:bg-silver-200 dark:bg-silver-800 dark:text-silver-100 dark:hover:bg-silver-700",
+          "bg-silver-100/50 text-silver-900 hover:bg-silver-200/50 dark:bg-silver-800/50 dark:text-silver-100 dark:hover:bg-silver-700/50 backdrop-blur-sm",
         ghost:
-          "hover:bg-silver-100 hover:text-palkia-600 dark:hover:bg-silver-800",
+          "hover:bg-palkia-100/50 hover:text-palkia-700 dark:hover:bg-palkia-900/30 dark:hover:text-palkia-300",
         link: "text-palkia-500 underline-offset-4 hover:underline",
       },
       size: {
