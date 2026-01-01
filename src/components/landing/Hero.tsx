@@ -103,7 +103,7 @@ export function Hero() {
                             className="h-14 px-10 rounded-full bg-white text-black hover:bg-palkia-50 font-bold text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
                         >
                             <Zap className="mr-2 h-5 w-5" />
-                            Start Extraction
+                            Launch App
                         </Button>
                     </Link>
                 </motion.div>
