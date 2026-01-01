@@ -194,3 +194,24 @@ export function useEntities(kbId: string, page = 1, limit = 20, type?: string, m
     placeholderData: (previousData) => previousData,
   });
 }
+
+export function useRetryMedia() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ kbId, mediaId }: { kbId: string; mediaId: string }) => {
+      const response = await knowledgeBasesApi.retryMedia(kbId, mediaId);
+      return response.data;
+    },
+    onSuccess: (_, { kbId }) => {
+      queryClient.invalidateQueries({ queryKey: ["media", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["source-ingestion"] });
+      queryClient.invalidateQueries({ queryKey: ["processing-status", kbId] });
+      toast.success("Reintento iniciado");
+    },
+    onError: (error: Error) => {
+      toast.error("Error al reintentar");
+      console.error(error);
+    },
+  });
+}
