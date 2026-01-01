@@ -43,6 +43,11 @@ export interface KnowledgeBaseCreate {
   description?: string | null;
 }
 
+export interface KnowledgeBaseUpdate {
+  name?: string;
+  description?: string | null;
+}
+
 export interface Source {
   id: string;
   knowledge_base_id: string;

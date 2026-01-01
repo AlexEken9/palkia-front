@@ -7,7 +7,8 @@ import { Moon, Sun, Menu } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useUIStore } from "@/lib/stores";
 import { siteConfig } from "@/config/site";
-import { PalkiaSvg } from "./palkia-svg";
+
+const PALKIA_GIF = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-black-and-white/5/50/Pokemans_484.gif?width=325&dpr=2";
 
 export function Navbar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -35,7 +36,7 @@ export function Navbar() {
             <div className="relative">
               <div className="absolute inset-0 bg-palkia-400 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
               <img 
-                src="https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-black-and-white/5/50/Pokemans_484.gif?width=325&dpr=2" 
+                src={PALKIA_GIF} 
                 alt="Palkia Logo" 
                 width={42} 
                 height={42} 

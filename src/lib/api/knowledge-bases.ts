@@ -2,6 +2,7 @@ import { apiClient } from "./client";
 import type {
   KnowledgeBase,
   KnowledgeBaseCreate,
+  KnowledgeBaseUpdate,
   Source,
   SourceCreate,
   SourceIngestionStatus,
@@ -22,6 +23,9 @@ export const knowledgeBasesApi = {
   
   create: (data: KnowledgeBaseCreate) => 
     apiClient.post<KnowledgeBase>("/knowledge-bases", data),
+  
+  update: (id: string, data: KnowledgeBaseUpdate) =>
+    apiClient.patch<KnowledgeBase>(`/knowledge-bases/${id}`, data),
   
   delete: (id: string) => 
     apiClient.delete(`/knowledge-bases/${id}`),

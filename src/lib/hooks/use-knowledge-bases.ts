@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { knowledgeBasesApi } from "@/lib/api";
-import type { KnowledgeBaseCreate, SourceCreate } from "@/types/api";
+import type { KnowledgeBaseCreate, KnowledgeBaseUpdate, SourceCreate } from "@/types/api";
 import { toast } from "sonner";
 import { isValidUUID } from "@/lib/utils";
 
@@ -51,13 +51,50 @@ export function useDeleteKnowledgeBase() {
   return useMutation({
     mutationFn: async (id: string) => {
       await knowledgeBasesApi.delete(id);
+      return id;
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["knowledge-bases", id] });
+      await queryClient.cancelQueries({ queryKey: ["sources", id] });
+      await queryClient.cancelQueries({ queryKey: ["media", id] });
+      await queryClient.cancelQueries({ queryKey: ["extraction-status", id] });
+      await queryClient.cancelQueries({ queryKey: ["concepts", id] });
+      await queryClient.cancelQueries({ queryKey: ["entities", id] });
+      await queryClient.cancelQueries({ queryKey: ["processing-status", id] });
+    },
+    onSuccess: (id) => {
+      queryClient.removeQueries({ queryKey: ["knowledge-bases", id] });
+      queryClient.removeQueries({ queryKey: ["sources", id] });
+      queryClient.removeQueries({ queryKey: ["media", id] });
+      queryClient.removeQueries({ queryKey: ["extraction-status", id] });
+      queryClient.removeQueries({ queryKey: ["concepts", id] });
+      queryClient.removeQueries({ queryKey: ["entities", id] });
+      queryClient.removeQueries({ queryKey: ["processing-status", id] });
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
       toast.success("Knowledge base deleted");
     },
     onError: (error: Error) => {
       toast.error("Failed to delete knowledge base");
+      console.error(error);
+    },
+  });
+}
+
+export function useUpdateKnowledgeBase() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: KnowledgeBaseUpdate }) => {
+      const response = await knowledgeBasesApi.update(id, data);
+      return response.data;
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases", id] });
+      toast.success("Knowledge base updated");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to update knowledge base");
       console.error(error);
     },
   });

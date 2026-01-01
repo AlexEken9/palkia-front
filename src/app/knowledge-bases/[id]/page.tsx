@@ -25,6 +25,7 @@ import {
   RefreshCw,
   Trash2,
   Filter,
+  Pencil,
 } from "lucide-react";
 import { 
   Button, 
@@ -45,6 +46,7 @@ import {
   Input,
   Progress,
   Skeleton,
+  Textarea,
 } from "@/components/ui";
 import { Navbar, Sidebar } from "@/components/shared";
 import { MediaProgressBar } from "@/components/shared/media-status-card";
@@ -57,6 +59,7 @@ import {
   useAddSource,
   useExtractionStatus,
   useDeleteKnowledgeBase,
+  useUpdateKnowledgeBase,
   useDeleteSource,
   useSourceIngestionStatus,
   useRetryMedia,
@@ -78,12 +81,16 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   
   const addSourceMutation = useAddSource();
   const deleteMutation = useDeleteKnowledgeBase();
+  const updateMutation = useUpdateKnowledgeBase();
   const deleteSourceMutation = useDeleteSource();
   
   const [activeTab, setActiveTab] = useState("sources");
   const [isAddSourceOpen, setIsAddSourceOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [sourceUrl, setSourceUrl] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   const detectedSourceType = sourceUrl ? detectYouTubeSourceType(sourceUrl) : null;
   
@@ -100,12 +107,32 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   };
 
   const handleDelete = async () => {
-    await deleteMutation.mutateAsync(id);
     router.push("/knowledge-bases");
+    deleteMutation.mutate(id);
   };
 
   const handleDeleteSource = async (sourceId: string) => {
     await deleteSourceMutation.mutateAsync({ sourceId, kbId: id });
+  };
+
+  const handleOpenEditDialog = () => {
+    setEditName(kb?.name || "");
+    setEditDescription(kb?.description || "");
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateKnowledgeBase = async () => {
+    if (!editName.trim()) return;
+    
+    await updateMutation.mutateAsync({
+      id,
+      data: { 
+        name: editName.trim(), 
+        description: editDescription.trim() || null 
+      },
+    });
+    
+    setIsEditDialogOpen(false);
   };
 
   if (kbLoading) {
@@ -170,9 +197,19 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-silver-900 dark:text-silver-100">
-                {kb.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold tracking-tight text-silver-900 dark:text-silver-100">
+                  {kb.name}
+                </h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleOpenEditDialog}
+                  className="h-8 w-8 text-silver-400 hover:text-palkia-500"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="mt-1 text-silver-500 dark:text-silver-400">
                 {kb.description || "No description"}
               </p>
@@ -369,6 +406,57 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Knowledge Base</DialogTitle>
+            <DialogDescription>
+              Update the name and description of this knowledge base.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Knowledge base name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Optional description"
+                rows={3}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="default"
+              onClick={handleUpdateKnowledgeBase}
+              disabled={!editName.trim() || updateMutation.isPending}
+            >
+              {updateMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Pencil className="mr-2 h-4 w-4" />
+              )}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -475,7 +563,7 @@ function SourceCard({
   onDelete: () => void;
   isDeleting: boolean;
 }) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const { data: ingestionStatus } = useSourceIngestionStatus(source.id, kbId);
   
@@ -498,7 +586,11 @@ function SourceCard({
 
   const handleDelete = () => {
     onDelete();
-    setIsDeleteDialogOpen(false);
+    setDeleteStep(0);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteStep(0);
   };
 
   const getIngestionMessage = () => {
@@ -549,7 +641,7 @@ function SourceCard({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsDeleteDialogOpen(true)}
+              onClick={() => setDeleteStep(1)}
               className="text-silver-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
             >
               <Trash2 className="h-4 w-4" />
@@ -637,17 +729,40 @@ function SourceCard({
         </CardContent>
       </Card>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <Dialog open={deleteStep === 1} onOpenChange={(open) => !open && setDeleteStep(0)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Source</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete "{source.title || "this source"}"? 
-              This will also delete all {stats.total} associated media items and their data.
+              This will also delete all {stats.total} associated media items and their extracted data.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button variant="outline" onClick={handleCloseDeleteDialog}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={() => setDeleteStep(2)}
+            >
+              Yes, delete this source
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteStep === 2} onOpenChange={(open) => !open && setDeleteStep(0)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">⚠️ Final Confirmation</DialogTitle>
+            <DialogDescription>
+              This action is <strong>permanent and cannot be undone</strong>. 
+              All {stats.total} media items, transcripts, and extracted intelligence will be lost forever.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDeleteDialog}>
               Cancel
             </Button>
             <Button 
@@ -660,7 +775,7 @@ function SourceCard({
               ) : (
                 <Trash2 className="mr-2 h-4 w-4" />
               )}
-              Delete
+              Delete permanently
             </Button>
           </DialogFooter>
         </DialogContent>
