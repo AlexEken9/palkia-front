@@ -97,7 +97,7 @@ export function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.8 }}
                 >
-                    <Link href="/knowledge-bases">
+                    <Link href="/app/knowledge-bases">
                         <Button
                             size="lg"
                             className="group relative h-16 px-10 rounded-full bg-white text-black font-bold text-lg overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)] transition-all duration-500"

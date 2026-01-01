@@ -15,12 +15,12 @@ import { useUIStore } from "@/lib/stores";
 const navItems = [
   {
     title: "Knowledge Bases",
-    href: "/knowledge-bases",
+    href: "/app/knowledge-bases",
     icon: Database,
   },
   {
     title: "Settings",
-    href: "/settings",
+    href: "/app/settings",
     icon: Settings,
   },
 ];

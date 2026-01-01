@@ -56,7 +56,7 @@ export function CTA() {
                     viewport={{ once: true, amount: 0.3 }}
                     className="opacity-0"
                 >
-                    <Link href="/knowledge-bases">
+                    <Link href="/app/knowledge-bases">
                         <Button
                             size="lg"
                             className="group relative h-16 px-10 rounded-full bg-white text-black font-bold text-xl overflow-hidden shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] transition-all duration-500"

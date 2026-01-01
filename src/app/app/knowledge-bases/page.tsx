@@ -28,7 +28,6 @@ import {
   Label,
   Textarea,
 } from "@/components/ui";
-import { Navbar, Sidebar } from "@/components/shared";
 import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase } from "@/lib/hooks";
 import { formatDate } from "@/lib/utils";
 import type { KnowledgeBase } from "@/types";
@@ -98,130 +97,125 @@ export default function KnowledgeBasesPage() {
   const kbToDelete = knowledgeBases?.find(kb => kb.id === deleteConfirmId);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-      
-      <main className="lg:pl-64 pt-16">
-        <div className="p-6 lg:p-8">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Knowledge Bases
-              </h1>
-              <p className="mt-1 text-muted-foreground">
-                Manage your intelligence extraction sources
-              </p>
-            </div>
-            <Button 
-              variant="default" 
-              className="gap-2"
-              onClick={() => setIsCreateDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              New Knowledge Base
-            </Button>
+    <>
+      <div className="p-6 lg:p-8">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              Knowledge Bases
+            </h1>
+            <p className="mt-1 text-muted-foreground">
+              Manage your intelligence extraction sources
+            </p>
           </div>
+          <Button 
+            variant="default" 
+            className="gap-2"
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            New Knowledge Base
+          </Button>
+        </div>
 
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search knowledge bases..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Sort by:</span>
-              <div className="flex gap-1">
-                {([
-                  { field: "name", label: "Name" },
-                  { field: "created_at", label: "Date" },
-                  { field: "media_count", label: "Media" },
-                ] as const).map(({ field, label }) => (
-                  <Button
-                    key={field}
-                    variant={sortField === field ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => handleSort(field)}
-                    className="gap-1"
-                  >
-                    {label}
-                    {sortField === field && (
-                      <ArrowUpDown className="h-3 w-3" />
-                    )}
-                  </Button>
-                ))}
-              </div>
-            </div>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search knowledge bases..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-palkia-500" />
-            </div>
-          ) : error ? (
-            <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30">
-              <CardContent className="py-6">
-                <p className="text-center text-red-700 dark:text-red-400">
-                  Failed to load knowledge bases. Is the backend running?
-                </p>
-              </CardContent>
-            </Card>
-          ) : filteredAndSorted.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredAndSorted.map((kb) => (
-                <KBCard 
-                  key={kb.id} 
-                  kb={kb} 
-                  onDelete={() => setDeleteConfirmId(kb.id)}
-                />
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <div className="flex gap-1">
+              {([
+                { field: "name", label: "Name" },
+                { field: "created_at", label: "Date" },
+                { field: "media_count", label: "Media" },
+              ] as const).map(({ field, label }) => (
+                <Button
+                  key={field}
+                  variant={sortField === field ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => handleSort(field)}
+                  className="gap-1"
+                >
+                  {label}
+                  {sortField === field && (
+                    <ArrowUpDown className="h-3 w-3" />
+                  )}
+                </Button>
               ))}
             </div>
-          ) : knowledgeBases && knowledgeBases.length > 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="py-12">
-                <div className="text-center">
-                  <Search className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-4 text-lg font-medium text-foreground">
-                    No results found
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Try adjusting your search query
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-dashed">
-              <CardContent className="py-12">
-                <div className="text-center">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-palkia-100 dark:bg-palkia-900/30">
-                    <Database className="h-6 w-6 text-palkia-600 dark:text-palkia-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-foreground">
-                    No knowledge bases yet
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Create your first knowledge base to start extracting intelligence
-                  </p>
-                  <Button 
-                    variant="default" 
-                    className="mt-4"
-                    onClick={() => setIsCreateDialogOpen(true)}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Knowledge Base
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          </div>
         </div>
-      </main>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-palkia-500" />
+          </div>
+        ) : error ? (
+          <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30">
+            <CardContent className="py-6">
+              <p className="text-center text-red-700 dark:text-red-400">
+                Failed to load knowledge bases. Is the backend running?
+              </p>
+            </CardContent>
+          </Card>
+        ) : filteredAndSorted.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredAndSorted.map((kb) => (
+              <KBCard 
+                key={kb.id} 
+                kb={kb} 
+                onDelete={() => setDeleteConfirmId(kb.id)}
+              />
+            ))}
+          </div>
+        ) : knowledgeBases && knowledgeBases.length > 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-12">
+              <div className="text-center">
+                <Search className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mt-4 text-lg font-medium text-foreground">
+                  No results found
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Try adjusting your search query
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-dashed">
+            <CardContent className="py-12">
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-palkia-100 dark:bg-palkia-900/30">
+                  <Database className="h-6 w-6 text-palkia-600 dark:text-palkia-400" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground">
+                  No knowledge bases yet
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Create your first knowledge base to start extracting intelligence
+                </p>
+                <Button 
+                  variant="default" 
+                  className="mt-4"
+                  onClick={() => setIsCreateDialogOpen(true)}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Knowledge Base
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
@@ -307,7 +301,7 @@ export default function KnowledgeBasesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 
@@ -338,7 +332,7 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
               />
               <div className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-border bg-card shadow-lg py-1 z-50">
                 <Link 
-                  href={`/knowledge-bases/${kb.id}`}
+                  href={`/app/knowledge-bases/${kb.id}`}
                   className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
                   onClick={() => setShowMenu(false)}
                 >
@@ -362,7 +356,7 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
         </div>
       </div>
 
-      <Link href={`/knowledge-bases/${kb.id}`}>
+      <Link href={`/app/knowledge-bases/${kb.id}`}>
         <CardContent className="pt-6">
           <div className="mb-4 pr-8">
             <h3 className="font-semibold text-foreground">

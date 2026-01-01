@@ -48,7 +48,6 @@ import {
   Skeleton,
   Textarea,
 } from "@/components/ui";
-import { Navbar, Sidebar } from "@/components/shared";
 import { MediaProgressBar } from "@/components/shared/media-status-card";
 import { 
   useKnowledgeBase, 
@@ -107,7 +106,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   };
 
   const handleDelete = async () => {
-    router.push("/knowledge-bases");
+    router.push("/app/knowledge-bases");
     deleteMutation.mutate(id);
   };
 
@@ -137,178 +136,161 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
   if (kbLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <Sidebar />
-        <main className="lg:pl-64 pt-16">
-          <div className="p-6 lg:p-8">
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-        </main>
+      <div className="p-6 lg:p-8">
+        <Skeleton className="h-8 w-64 mb-2" />
+        <Skeleton className="h-4 w-96" />
       </div>
     );
   }
 
   if (!kb) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <Sidebar />
-        <main className="lg:pl-64 pt-16">
-          <div className="p-6 lg:p-8">
-            <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30">
-              <CardContent className="py-6">
-                <p className="text-center text-red-700 dark:text-red-400">
-                  Knowledge base not found
-                </p>
-                <div className="mt-4 text-center">
-                  <Link href="/knowledge-bases">
-                    <Button variant="outline">
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back to Knowledge Bases
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+      <div className="p-6 lg:p-8">
+        <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30">
+          <CardContent className="py-6">
+            <p className="text-center text-red-700 dark:text-red-400">
+              Knowledge base not found
+            </p>
+            <div className="mt-4 text-center">
+              <Link href="/app/knowledge-bases">
+                <Button variant="outline">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Knowledge Bases
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-      
-      <main className="lg:pl-64 pt-16">
-        <div className="p-6 lg:p-8">
-          <div className="mb-6">
-            <Link 
-              href="/knowledge-bases"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-palkia-500"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Knowledge Bases
-            </Link>
-          </div>
-
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                  {kb.name}
-                </h1>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleOpenEditDialog}
-                  className="h-8 w-8 text-muted-foreground hover:text-palkia-500"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="mt-1 text-muted-foreground">
-                {kb.description || "No description"}
-              </p>
-              <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Database className="h-4 w-4" />
-                  {sources?.length || 0} sources
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {extractionStatus?.entities_extracted || 0} entities
-                </span>
-                <span className="flex items-center gap-1">
-                  <Lightbulb className="h-4 w-4" />
-                  {extractionStatus?.concepts_extracted || 0} concepts
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="default" 
-                onClick={() => setIsAddSourceOpen(true)}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Source
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-4 mb-6">
-            <StatCard 
-              title="Sources" 
-              value={sources?.length || 0} 
-              icon={Database}
-              color="palkia"
-            />
-            <StatCard 
-              title="Media" 
-              value={mediaItems?.length || 0} 
-              icon={Video}
-              color="pearl"
-            />
-            <StatCard 
-              title="Concepts" 
-              value={extractionStatus?.concepts_extracted || 0} 
-              icon={Lightbulb}
-              color="palkia"
-            />
-            <StatCard 
-              title="Entities" 
-              value={extractionStatus?.entities_extracted || 0} 
-              icon={Users}
-              color="pearl"
-            />
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4 bg-white/50 dark:bg-black/20 p-1 rounded-xl">
-              <TabsTrigger value="sources" className="rounded-lg">Sources</TabsTrigger>
-              <TabsTrigger value="media" className="rounded-lg">Media</TabsTrigger>
-              <TabsTrigger value="concepts" className="rounded-lg">Concepts</TabsTrigger>
-              <TabsTrigger value="entities" className="rounded-lg">Entities</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="sources">
-              <SourcesTab 
-                sources={sources || []} 
-                mediaItems={mediaItems || []}
-                kbId={id}
-                onAddSource={() => setIsAddSourceOpen(true)} 
-                onDeleteSource={handleDeleteSource}
-                isDeletingSource={deleteSourceMutation.isPending}
-              />
-            </TabsContent>
-            
-            <TabsContent value="media">
-              <MediaTab mediaItems={mediaItems || []} kbId={id} />
-            </TabsContent>
-
-            <TabsContent value="concepts">
-              <ConceptsTab kbId={id} mediaItems={mediaItems || []} />
-            </TabsContent>
-            
-            <TabsContent value="entities">
-              <EntitiesTab kbId={id} mediaItems={mediaItems || []} />
-            </TabsContent>
-          </Tabs>
+    <>
+      <div className="p-6 lg:p-8">
+        <div className="mb-6">
+          <Link 
+            href="/app/knowledge-bases"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-palkia-500"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Knowledge Bases
+          </Link>
         </div>
-      </main>
+
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                {kb.name}
+              </h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleOpenEditDialog}
+                className="h-8 w-8 text-muted-foreground hover:text-palkia-500"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              {kb.description || "No description"}
+            </p>
+            <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Database className="h-4 w-4" />
+                {sources?.length || 0} sources
+              </span>
+              <span className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                {extractionStatus?.entities_extracted || 0} entities
+              </span>
+              <span className="flex items-center gap-1">
+                <Lightbulb className="h-4 w-4" />
+                {extractionStatus?.concepts_extracted || 0} concepts
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="default" 
+              onClick={() => setIsAddSourceOpen(true)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Source
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4 mb-6">
+          <StatCard 
+            title="Sources" 
+            value={sources?.length || 0} 
+            icon={Database}
+            color="palkia"
+          />
+          <StatCard 
+            title="Media" 
+            value={mediaItems?.length || 0} 
+            icon={Video}
+            color="pearl"
+          />
+          <StatCard 
+            title="Concepts" 
+            value={extractionStatus?.concepts_extracted || 0} 
+            icon={Lightbulb}
+            color="palkia"
+          />
+          <StatCard 
+            title="Entities" 
+            value={extractionStatus?.entities_extracted || 0} 
+            icon={Users}
+            color="pearl"
+          />
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4 bg-white/50 dark:bg-black/20 p-1 rounded-xl">
+            <TabsTrigger value="sources" className="rounded-lg">Sources</TabsTrigger>
+            <TabsTrigger value="media" className="rounded-lg">Media</TabsTrigger>
+            <TabsTrigger value="concepts" className="rounded-lg">Concepts</TabsTrigger>
+            <TabsTrigger value="entities" className="rounded-lg">Entities</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="sources">
+            <SourcesTab 
+              sources={sources || []} 
+              mediaItems={mediaItems || []}
+              kbId={id}
+              onAddSource={() => setIsAddSourceOpen(true)} 
+              onDeleteSource={handleDeleteSource}
+              isDeletingSource={deleteSourceMutation.isPending}
+            />
+          </TabsContent>
+          
+          <TabsContent value="media">
+            <MediaTab mediaItems={mediaItems || []} kbId={id} />
+          </TabsContent>
+
+          <TabsContent value="concepts">
+            <ConceptsTab kbId={id} mediaItems={mediaItems || []} />
+          </TabsContent>
+          
+          <TabsContent value="entities">
+            <EntitiesTab kbId={id} mediaItems={mediaItems || []} />
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <Dialog open={isAddSourceOpen} onOpenChange={setIsAddSourceOpen}>
         <DialogContent className="max-w-lg">
@@ -457,7 +439,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 
