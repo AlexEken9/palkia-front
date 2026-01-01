@@ -166,37 +166,53 @@ body {
 }
 
 .text-gradient-iridescent {
-  background: linear-gradient(135deg,
-      #f21d78 0%,
-      #b4caff 30%,
-      #f21d78 60%,
-      #7d9dff 100%);
-  background-size: 200% auto;
+  background: linear-gradient(
+    90deg,
+    #f21d78 0%,
+    #ff6b9d 15%,
+    #c4b5fd 30%,
+    #7dd3fc 45%,
+    #a5f3fc 55%,
+    #c4b5fd 70%,
+    #ff6b9d 85%,
+    #f21d78 100%
+  );
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shine 8s linear infinite;
+  animation: iridescent-flow 6s ease-in-out infinite;
 }
 
 .dark .text-gradient-iridescent {
-  background: linear-gradient(135deg,
-      #fff 0%,
-      #b4caff 30%,
-      #f86ca6 60%,
-      #7d9dff 100%);
-  background-size: 200% auto;
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #f0abfc 12%,
+    #c4b5fd 24%,
+    #93c5fd 36%,
+    #7dd3fc 48%,
+    #a5f3fc 60%,
+    #93c5fd 72%,
+    #c4b5fd 84%,
+    #f0abfc 96%,
+    #ffffff 100%
+  );
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-@keyframes shine {
-  to {
-    background-position: 200% center;
+@keyframes iridescent-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
 }
 
-/* Subtler Noise */
 .noise-bg {
   position: fixed;
   top: 0;

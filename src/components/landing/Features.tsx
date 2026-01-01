@@ -51,12 +51,24 @@ export function Features() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {features.map((feature, index) => (
                         <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            viewport={{ once: true }}
-                            className="group relative p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-palkia-500/5"
+                            key={feature.title}
+                            initial="hidden"
+                            whileInView="visible"
+                            variants={{
+                                hidden: { opacity: 0, y: 20 },
+                                visible: { 
+                                    opacity: 1, 
+                                    y: 0,
+                                    transition: { 
+                                        type: "spring",
+                                        stiffness: 100,
+                                        damping: 20,
+                                        delay: index * 0.05
+                                    }
+                                }
+                            }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            className="group relative p-8 rounded-2xl bg-white/5 border border-white/10 opacity-0 hover:bg-white/10 transition-colors duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-palkia-500/5"
                         >
                             <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
 
