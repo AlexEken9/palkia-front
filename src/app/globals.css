@@ -166,34 +166,34 @@ body {
 }
 
 .btn-palkia {
+  background: linear-gradient(135deg, #e87ea1 0%, #d42a66 100%);
+  color: white;
+  border: none;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #f21d78 0%, #d60d5e 100%);
-  box-shadow: 0 0 20px rgba(242, 29, 120, 0.3);
   transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(232, 126, 161, 0.3);
 }
 
 .btn-palkia:hover {
-  box-shadow: 0 0 30px rgba(242, 29, 120, 0.5);
+  background: linear-gradient(135deg, #ff9ebc 0%, #e64e83 100%);
+  box-shadow: 0 0 25px rgba(232, 126, 161, 0.5);
   transform: translateY(-1px);
 }
 
-.btn-palkia::before {
-  content: "";
+.btn-palkia::after {
+  content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    transparent 100%
-  );
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: 0.5s;
 }
 
-.btn-palkia:hover::before {
-  transform: translateX(100%);
+.btn-palkia:hover::after {
+  left: 100%;
 }
 
 .text-gradient-iridescent {
