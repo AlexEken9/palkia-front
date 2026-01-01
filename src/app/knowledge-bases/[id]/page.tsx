@@ -137,7 +137,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
   if (kbLoading) {
     return (
-      <div className="min-h-screen bg-silver-50 dark:bg-silver-950">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <Sidebar />
         <main className="lg:pl-64 pt-16">
@@ -152,7 +152,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
 
   if (!kb) {
     return (
-      <div className="min-h-screen bg-silver-50 dark:bg-silver-950">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <Sidebar />
         <main className="lg:pl-64 pt-16">
@@ -179,7 +179,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-silver-50 dark:bg-silver-950">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <Sidebar />
       
@@ -188,7 +188,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
           <div className="mb-6">
             <Link 
               href="/knowledge-bases"
-              className="inline-flex items-center gap-1 text-sm text-silver-500 hover:text-palkia-500"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-palkia-500"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Knowledge Bases
@@ -198,22 +198,22 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold tracking-tight text-silver-900 dark:text-silver-100">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
                   {kb.name}
                 </h1>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleOpenEditDialog}
-                  className="h-8 w-8 text-silver-400 hover:text-palkia-500"
+                  className="h-8 w-8 text-muted-foreground hover:text-palkia-500"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="mt-1 text-silver-500 dark:text-silver-400">
+              <p className="mt-1 text-muted-foreground">
                 {kb.description || "No description"}
               </p>
-              <div className="mt-3 flex items-center gap-4 text-sm text-silver-500">
+              <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Database className="h-4 w-4" />
                   {sources?.length || 0} sources
@@ -477,10 +477,10 @@ function StatCard({
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-silver-500">{title}</p>
-            <p className="text-2xl font-bold text-silver-900 dark:text-silver-100">{value}</p>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold text-foreground">{value}</p>
           </div>
-          <Icon className={`h-8 w-8 ${color === "palkia" ? "text-palkia-500" : "text-pearl-500"}`} />
+          <Icon className={`h-8 w-8 ${color === "palkia" ? "text-palkia-500" : "text-muted-foreground"}`} />
         </div>
       </CardContent>
     </Card>
@@ -517,11 +517,11 @@ function SourcesTab({
       <Card className="border-dashed glass-card">
         <CardContent className="py-12">
           <div className="text-center">
-            <Youtube className="mx-auto h-12 w-12 text-silver-300" />
-            <h3 className="mt-4 text-lg font-medium text-silver-900 dark:text-silver-100">
+            <Youtube className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">
               No sources yet
             </h3>
-            <p className="mt-1 text-sm text-silver-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Add YouTube channels, playlists, or videos as sources
             </p>
             <Button variant="default" className="mt-4" onClick={onAddSource}>
@@ -621,20 +621,20 @@ function SourceCard({
                 </>
               ) : (
                 <>
-                  <h4 className="font-medium text-silver-900 dark:text-silver-100 truncate" title={source.title || "Untitled Source"}>
+                  <h4 className="font-medium text-foreground truncate" title={source.title || "Untitled Source"}>
                     {source.title || "Untitled Source"}
                   </h4>
                   <a 
                     href={source.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-sm text-silver-500 truncate block hover:text-palkia-500"
+                    className="text-sm text-muted-foreground truncate block hover:text-palkia-500"
                   >
                     {source.url}
                   </a>
                 </>
               )}
-              <div className="mt-2 text-xs text-silver-400">
+              <div className="mt-2 text-xs text-muted-foreground">
                 Added {formatDate(source.created_at)}
               </div>
             </div>
@@ -642,7 +642,7 @@ function SourceCard({
               variant="ghost"
               size="sm"
               onClick={() => setDeleteStep(1)}
-              className="text-silver-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
+              className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -657,8 +657,8 @@ function SourceCard({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-silver-500">Progress</span>
-              <span className="font-medium text-silver-900 dark:text-silver-100">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium text-foreground">
                 {stats.completed} / {stats.total} completed
               </span>
             </div>
@@ -667,7 +667,7 @@ function SourceCard({
             
             <div className="flex flex-wrap gap-2 text-xs">
               {stats.pending > 0 && (
-                <Badge variant="outline" className="text-silver-500 border-silver-200">
+                <Badge variant="outline" className="text-muted-foreground border-border">
                   {stats.pending} Pending
                 </Badge>
               )}
@@ -707,7 +707,7 @@ function SourceCard({
               <div className="pt-2">
                 <Button
                   variant="ghost"
-                  className="w-full flex items-center justify-between text-silver-500 hover:text-silver-900 dark:hover:text-silver-100 hover:bg-silver-100 dark:hover:bg-silver-800/50"
+                  className="w-full flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted"
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
                   <span className="text-xs font-medium uppercase tracking-wider">
@@ -717,7 +717,7 @@ function SourceCard({
                 </Button>
 
                 {isExpanded && (
-                  <div className="mt-3 space-y-3 border-t border-silver-100 dark:border-silver-800 pt-3 animate-in slide-in-from-top-2 duration-200">
+                  <div className="mt-3 space-y-3 border-t border-border pt-3 animate-in slide-in-from-top-2 duration-200">
                     {mediaItems.map((item) => (
                       <MediaItemCard key={item.id} item={item} kbId={kbId} />
                     ))}
@@ -788,28 +788,28 @@ function MediaItemCard({ item, kbId }: { item: MediaContent; kbId: string }) {
   const retryMutation = useRetryMedia();
 
   return (
-    <div className="group rounded-xl border border-silver-200/60 dark:border-silver-800 p-4 bg-white/60 dark:bg-silver-900/40 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-silver-900/60 transition-colors shadow-sm">
+    <div className="group rounded-xl border border-border p-4 bg-card/60 dark:bg-card/40 backdrop-blur-sm hover:bg-card/80 dark:hover:bg-card/60 transition-colors shadow-sm">
       <div className="flex gap-4 items-center">
         {item.thumbnail_url ? (
           <div className="relative shrink-0 self-center">
             <img 
               src={item.thumbnail_url} 
               alt={item.title}
-              className="h-16 w-28 rounded-md object-cover border border-silver-200 dark:border-silver-700"
+              className="h-16 w-28 rounded-md object-cover border border-border"
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity rounded-md">
               <Play className="h-5 w-5 text-white fill-white" />
             </div>
           </div>
         ) : (
-          <div className="h-16 w-28 shrink-0 self-center rounded-md bg-silver-100 dark:bg-silver-800 flex items-center justify-center border border-silver-200 dark:border-silver-700">
-            <Video className="h-5 w-5 text-silver-400" />
+          <div className="h-16 w-28 shrink-0 self-center rounded-md bg-muted flex items-center justify-center border border-border">
+            <Video className="h-5 w-5 text-muted-foreground" />
           </div>
         )}
         
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="flex items-start justify-between gap-2">
-            <h5 className="text-sm font-medium text-silver-900 dark:text-silver-100 truncate" title={item.title}>
+            <h5 className="text-sm font-medium text-foreground truncate" title={item.title}>
               {item.title}
             </h5>
             <div className="flex items-center gap-1 shrink-0">
@@ -829,7 +829,7 @@ function MediaItemCard({ item, kbId }: { item: MediaContent; kbId: string }) {
                   href={`https://youtube.com/watch?v=${item.remote_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-silver-400 hover:text-palkia-500 p-1"
+                  className="text-muted-foreground hover:text-palkia-500 p-1"
                 >
                   <ExternalLink className="h-3 w-3" />
                 </a>
@@ -837,7 +837,7 @@ function MediaItemCard({ item, kbId }: { item: MediaContent; kbId: string }) {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 text-xs text-silver-500 mt-0.5 mb-1.5">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 mb-1.5">
             {item.duration_seconds && (
               <span className="flex items-center gap-0.5">
                 <Clock className="h-3 w-3" />
@@ -867,11 +867,11 @@ function MediaTab({ mediaItems, kbId }: { mediaItems: MediaContent[]; kbId: stri
       <Card className="border-dashed glass-card">
         <CardContent className="py-12">
           <div className="text-center">
-            <Video className="mx-auto h-12 w-12 text-silver-300" />
-            <h3 className="mt-4 text-lg font-medium text-silver-900 dark:text-silver-100">
+            <Video className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">
               No media found
             </h3>
-            <p className="mt-1 text-sm text-silver-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Media will appear here after adding sources
             </p>
           </div>
@@ -915,11 +915,11 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
       <Card className="border-dashed glass-card">
         <CardContent className="py-12">
           <div className="text-center">
-            <Lightbulb className="mx-auto h-12 w-12 text-silver-300" />
-            <h3 className="mt-4 text-lg font-medium text-silver-900 dark:text-silver-100">
+            <Lightbulb className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">
               No concepts extracted yet
             </h3>
-            <p className="mt-1 text-sm text-silver-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Concepts will appear here once media processing completes
             </p>
           </div>
@@ -932,7 +932,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <Filter className="h-4 w-4 text-silver-500" />
+          <Filter className="h-4 w-4 text-muted-foreground" />
           <select
             aria-label="Filter concepts by type"
             value={type}
@@ -940,7 +940,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               setType(e.target.value);
               setPage(1);
             }}
-            className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+            className="h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500"
           >
             <option value="all">All Types</option>
             <option value="definition">Definition</option>
@@ -959,7 +959,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               setMediaId(e.target.value);
               setPage(1);
             }}
-            className="h-9 max-w-[200px] rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+            className="h-9 max-w-[200px] rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500"
           >
             <option value="all">All Media</option>
             {mediaItems.map((item) => (
@@ -969,7 +969,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
             ))}
           </select>
         </div>
-        <span className="text-sm text-silver-500">
+        <span className="text-sm text-muted-foreground">
           {total} concepts found
         </span>
       </div>
@@ -981,19 +981,19 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-silver-900 dark:text-silver-100">
+                    <h4 className="font-medium text-foreground">
                       {concept.name}
                     </h4>
                     <Badge variant="outline" className="text-xs uppercase">
                       {concept.concept_type}
                     </Badge>
                   </div>
-                  <p className="text-sm text-silver-600 dark:text-silver-300">
+                  <p className="text-sm text-muted-foreground">
                     {concept.description}
                   </p>
                   
                   {concept.media_title && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-silver-500">
+                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                       <Video className="h-3 w-3 shrink-0" />
                       {concept.source_url ? (
                         <a
@@ -1016,7 +1016,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
                   )}
 
                   {concept.context && (
-                    <div className="mt-3 text-xs text-silver-500 bg-silver-50 dark:bg-silver-900/50 p-2 rounded border-l-2 border-palkia-300">
+                    <div className="mt-3 text-xs text-muted-foreground bg-muted p-2 rounded border-l-2 border-palkia-300">
                       "{concept.context}"
                     </div>
                   )}
@@ -1037,7 +1037,7 @@ function ConceptsTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-silver-500">
+          <span className="text-sm text-muted-foreground">
             Page {page} of {totalPages}
           </span>
           <Button
@@ -1080,11 +1080,11 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
       <Card className="border-dashed glass-card">
         <CardContent className="py-12">
           <div className="text-center">
-            <Users className="mx-auto h-12 w-12 text-silver-300" />
-            <h3 className="mt-4 text-lg font-medium text-silver-900 dark:text-silver-100">
+            <Users className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">
               No entities extracted yet
             </h3>
-            <p className="mt-1 text-sm text-silver-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Entities will appear here once media processing completes
             </p>
           </div>
@@ -1097,7 +1097,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <Filter className="h-4 w-4 text-silver-500" />
+          <Filter className="h-4 w-4 text-muted-foreground" />
           <select
             aria-label="Filter entities by type"
             value={type}
@@ -1105,7 +1105,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               setType(e.target.value);
               setPage(1);
             }}
-            className="h-9 rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+            className="h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500"
           >
             <option value="all">All Types</option>
             <option value="person">Person</option>
@@ -1124,7 +1124,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
               setMediaId(e.target.value);
               setPage(1);
             }}
-            className="h-9 max-w-[200px] rounded-lg border border-silver-300 bg-white px-3 text-sm text-silver-900 focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500 dark:border-silver-700 dark:bg-silver-900 dark:text-silver-100"
+            className="h-9 max-w-[200px] rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-palkia-500 focus:outline-none focus:ring-1 focus:ring-palkia-500"
           >
             <option value="all">All Media</option>
             {mediaItems.map((item) => (
@@ -1134,7 +1134,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
             ))}
           </select>
         </div>
-        <span className="text-sm text-silver-500">
+        <span className="text-sm text-muted-foreground">
           {total} entities found
         </span>
       </div>
@@ -1144,12 +1144,12 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
           <Card key={entity.id} className="glass-card">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <div className="rounded-full bg-pearl-100 dark:bg-pearl-900/30 p-2">
-                  <Users className="h-4 w-4 text-pearl-500" />
+                <div className="rounded-full bg-muted p-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-silver-900 dark:text-silver-100">
+                    <h4 className="font-medium text-foreground">
                       {entity.name}
                     </h4>
                     <Badge variant="outline" className="text-xs uppercase">
@@ -1157,7 +1157,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
                     </Badge>
                   </div>
                   {entity.description && (
-                    <p className="text-sm text-silver-500 line-clamp-2 mt-1">
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                       {entity.description}
                     </p>
                   )}
@@ -1173,7 +1173,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
                   )}
                   
                   {entity.media_title && (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-silver-500">
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                       <Video className="h-3 w-3 shrink-0" />
                       {entity.source_url ? (
                         <a
@@ -1211,7 +1211,7 @@ function EntitiesTab({ kbId, mediaItems }: { kbId: string; mediaItems: MediaCont
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-silver-500">
+          <span className="text-sm text-muted-foreground">
             Page {page} of {totalPages}
           </span>
           <Button

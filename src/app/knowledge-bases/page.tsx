@@ -98,7 +98,7 @@ export default function KnowledgeBasesPage() {
   const kbToDelete = knowledgeBases?.find(kb => kb.id === deleteConfirmId);
 
   return (
-    <div className="min-h-screen bg-silver-50 dark:bg-silver-950">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <Sidebar />
       
@@ -106,10 +106,10 @@ export default function KnowledgeBasesPage() {
         <div className="p-6 lg:p-8">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-silver-900 dark:text-silver-100">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 Knowledge Bases
               </h1>
-              <p className="mt-1 text-silver-500 dark:text-silver-400">
+              <p className="mt-1 text-muted-foreground">
                 Manage your intelligence extraction sources
               </p>
             </div>
@@ -125,7 +125,7 @@ export default function KnowledgeBasesPage() {
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-silver-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search knowledge bases..."
                 value={searchQuery}
@@ -135,7 +135,7 @@ export default function KnowledgeBasesPage() {
             </div>
             
             <div className="flex items-center gap-2">
-              <span className="text-sm text-silver-500">Sort by:</span>
+              <span className="text-sm text-muted-foreground">Sort by:</span>
               <div className="flex gap-1">
                 {([
                   { field: "name", label: "Name" },
@@ -185,11 +185,11 @@ export default function KnowledgeBasesPage() {
             <Card className="border-dashed">
               <CardContent className="py-12">
                 <div className="text-center">
-                  <Search className="mx-auto h-12 w-12 text-silver-300" />
-                  <h3 className="mt-4 text-lg font-medium text-silver-900 dark:text-silver-100">
+                  <Search className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-lg font-medium text-foreground">
                     No results found
                   </h3>
-                  <p className="mt-1 text-sm text-silver-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Try adjusting your search query
                   </p>
                 </div>
@@ -202,10 +202,10 @@ export default function KnowledgeBasesPage() {
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-palkia-100 dark:bg-palkia-900/30">
                     <Database className="h-6 w-6 text-palkia-600 dark:text-palkia-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-silver-900 dark:text-silver-100">
+                  <h3 className="text-lg font-medium text-foreground">
                     No knowledge bases yet
                   </h3>
-                  <p className="mt-1 text-sm text-silver-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Create your first knowledge base to start extracting intelligence
                   </p>
                   <Button 
@@ -336,10 +336,10 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
                 className="fixed inset-0" 
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-silver-200 bg-white shadow-lg dark:border-silver-700 dark:bg-silver-800 py-1 z-50">
+              <div className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-border bg-card shadow-lg py-1 z-50">
                 <Link 
                   href={`/knowledge-bases/${kb.id}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-silver-100 dark:hover:bg-silver-700"
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
                   onClick={() => setShowMenu(false)}
                 >
                   <Edit className="h-4 w-4" />
@@ -365,10 +365,10 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
       <Link href={`/knowledge-bases/${kb.id}`}>
         <CardContent className="pt-6">
           <div className="mb-4 pr-8">
-            <h3 className="font-semibold text-silver-900 dark:text-silver-100">
+            <h3 className="font-semibold text-foreground">
               {kb.name}
             </h3>
-            <p className="mt-1 text-sm text-silver-500 line-clamp-2">
+            <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
               {kb.description || "No description"}
             </p>
           </div>
@@ -376,13 +376,13 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1.5">
               <Video className="h-4 w-4 text-palkia-500" />
-              <span className="text-silver-600 dark:text-silver-400">
+              <span className="text-muted-foreground">
                 {kb.media_count} media
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Database className="h-4 w-4 text-pearl-500" />
-              <span className="text-silver-600 dark:text-silver-400">
+              <Database className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
                 {kb.source_count} sources
               </span>
             </div>
@@ -390,7 +390,7 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
 
           <div className="mt-4 flex items-center justify-between">
             <Badge variant="palkia">Ready</Badge>
-            <span className="text-xs text-silver-400">
+            <span className="text-xs text-muted-foreground">
               {formatDate(kb.created_at)}
             </span>
           </div>

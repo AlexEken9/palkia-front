@@ -14,9 +14,9 @@ const buttonVariants = cva(
         destructive:
           "bg-red-500/80 text-white shadow-sm hover:bg-red-600 backdrop-blur-sm",
         outline:
-          "border border-silver-300/50 bg-transparent hover:bg-palkia-50 hover:border-palkia-300 dark:border-silver-700/50 dark:hover:bg-palkia-900/20 text-foreground",
+          "border border-border bg-transparent hover:bg-palkia-50 hover:border-palkia-300 dark:hover:bg-palkia-900/20 text-foreground",
         secondary:
-          "bg-silver-100/50 text-silver-900 hover:bg-silver-200/50 dark:bg-silver-800/50 dark:text-silver-100 dark:hover:bg-silver-700/50 backdrop-blur-sm",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 backdrop-blur-sm",
         ghost:
           "hover:bg-palkia-100/50 hover:text-palkia-700 dark:hover:bg-palkia-900/30 dark:hover:text-palkia-300",
         link: "text-palkia-500 underline-offset-4 hover:underline",
