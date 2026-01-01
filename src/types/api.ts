@@ -1,13 +1,6 @@
-export type SourceType = 
-  | "youtube_channel"
-  | "youtube_playlist"
-  | "youtube_video"
-  | "discord_server"
-  | "discord_channel"
-  | "whatsapp_chat"
-  | "whatsapp_group";
+export type SourceType = string;
 
-export type ProcessingStatus = 
+export type ProcessingStatus =
   | "pending"
   | "downloading"
   | "transcribing"
@@ -35,21 +28,6 @@ export type EntityType =
   | "resource"
   | "event";
 
-export type IdeaType =
-  | "thesis"
-  | "argument"
-  | "pattern"
-  | "insight"
-  | "belief"
-  | "prediction";
-
-export type PatternType =
-  | "evolution"
-  | "contradiction"
-  | "reinforcement"
-  | "emergence"
-  | "shift";
-
 export interface KnowledgeBase {
   id: string;
   name: string;
@@ -57,7 +35,7 @@ export interface KnowledgeBase {
   created_at: string;
   updated_at: string;
   source_count: number;
-  video_count: number;
+  media_count: number;
 }
 
 export interface KnowledgeBaseCreate {
@@ -73,7 +51,7 @@ export interface Source {
   title: string | null;
   language: string | null;
   created_at: string;
-  video_count: number;
+  media_count: number;
 }
 
 export interface SourceCreate {
@@ -81,7 +59,7 @@ export interface SourceCreate {
   language?: string | null;
 }
 
-export interface VideoStatusCounts {
+export interface ContentStatusCounts {
   total: number;
   pending: number;
   downloading: number;
@@ -91,7 +69,7 @@ export interface VideoStatusCounts {
   failed: number;
 }
 
-export interface CurrentVideoInfo {
+export interface CurrentContentInfo {
   id: string;
   title: string;
   status: string;
@@ -105,14 +83,15 @@ export interface SourceIngestionStatus {
   progress_percent: number;
   current_stage: string;
   message: string | null;
-  videos: VideoStatusCounts;
-  current_video: CurrentVideoInfo | null;
+  media: ContentStatusCounts;
+  current_item: CurrentContentInfo | null;
 }
 
-export interface Video {
+export interface MediaContent {
   id: string;
-  source_id: string;
-  youtube_id: string;
+  source_id: string | null;
+  remote_id: string;
+  platform: string;
   title: string;
   description: string | null;
   duration_seconds: number | null;
@@ -126,7 +105,7 @@ export interface Video {
 
 export interface ProcessingStatusResponse {
   knowledge_base_id: string;
-  total_videos: number;
+  total_items: number;
   pending: number;
   processing: number;
   extracting: number;
@@ -144,8 +123,8 @@ export interface ExtractedConcept {
   raw_quote: string | null;
   confidence: number;
   created_at: string;
-  video_id?: string;
-  video_title?: string;
+  media_id?: string;
+  media_title?: string;
   source_id?: string;
   source_url?: string;
   start_time?: number | null;
@@ -161,87 +140,11 @@ export interface ExtractedEntity {
   sentiment: string | null;
   url: string | null;
   created_at: string;
-  video_id?: string;
-  video_title?: string;
+  media_id?: string;
+  media_title?: string;
   source_id?: string;
   source_url?: string;
   start_time?: number | null;
-}
-
-export interface ConsolidatedIdea {
-  id: string;
-  knowledge_base_id: string;
-  idea_type: IdeaType;
-  title: string;
-  description: string;
-  frequency: number;
-  importance_score: number;
-  sources: Record<string, unknown>[];
-  first_seen: string | null;
-  last_seen: string | null;
-  evolution_notes: string | null;
-  created_at: string;
-}
-
-export interface TemporalPattern {
-  id: string;
-  knowledge_base_id: string;
-  pattern_type: PatternType;
-  title: string;
-  description: string;
-  timeline: Record<string, unknown>[];
-  interpretation: string | null;
-  significance: number;
-  created_at: string;
-}
-
-export interface IntelligenceReportSummary {
-  id: string;
-  knowledge_base_id: string;
-  title: string;
-  version: number;
-  is_latest: boolean;
-  created_at: string;
-}
-
-export interface IntelligenceReport {
-  id: string;
-  knowledge_base_id: string;
-  title: string;
-  executive_summary: string;
-  sections: Record<string, unknown>;
-  metadata: Record<string, unknown>;
-  version: number;
-  created_at: string;
-}
-
-export type PipelineStageStatus = "pending" | "in_progress" | "completed" | "failed";
-
-export interface PipelineStageInfo {
-  name: string;
-  display_name: string;
-  description: string;
-  status: PipelineStageStatus;
-  progress_percent: number;
-  items_processed: number;
-  items_total: number;
-  started_at: string | null;
-  completed_at: string | null;
-  error: string | null;
-}
-
-export type PipelineStageKey = "video_processing" | "extraction" | "consolidation" | "report";
-
-export interface PipelineStatus {
-  knowledge_base_id: string;
-  status: "pending" | "processing" | "completed" | "failed";
-  current_stage: string;
-  progress_percent: number;
-  message?: string;
-  stages: Partial<Record<PipelineStageKey, PipelineStageInfo>>;
-  errors: string[];
-  started_at: string | null;
-  completed_at: string | null;
 }
 
 export interface ExtractionStatus {
@@ -251,22 +154,6 @@ export interface ExtractionStatus {
   concepts_extracted: number;
   entities_extracted: number;
   status: "pending" | "in_progress" | "completed" | "failed";
-}
-
-export interface ConsolidationStatus {
-  knowledge_base_id: string;
-  total_concepts: number;
-  consolidated_ideas: number;
-  temporal_patterns: number;
-  themes: string[];
-  status: string;
-}
-
-export interface ReportMarkdown {
-  report_id: string;
-  title: string;
-  markdown_content: string;
-  created_at: string;
 }
 
 export interface PaginatedResponse<T> {

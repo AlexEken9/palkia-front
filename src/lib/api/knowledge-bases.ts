@@ -5,15 +5,11 @@ import type {
   Source,
   SourceCreate,
   SourceIngestionStatus,
-  Video,
+  MediaContent,
   ProcessingStatusResponse,
   ExtractedConcept,
   ExtractedEntity,
-  ConsolidatedIdea,
-  TemporalPattern,
-  PipelineStatus,
   ExtractionStatus,
-  ConsolidationStatus,
   PaginatedResponse,
 } from "@/types/api";
 
@@ -42,14 +38,13 @@ export const knowledgeBasesApi = {
   getSourceIngestionStatus: (sourceId: string) =>
     apiClient.get<SourceIngestionStatus>(`/sources/${sourceId}/ingestion-status`),
   
-  getVideos: (kbId: string) =>
-    apiClient.get<PaginatedResponse<Video>>(`/knowledge-bases/${kbId}/videos`),
+  getMedia: (kbId: string, page = 1, limit = 20) =>
+    apiClient.get<PaginatedResponse<MediaContent>>(`/knowledge-bases/${kbId}/media`, {
+      params: { limit, skip: (page - 1) * limit }
+    }),
   
   getProcessingStatus: (kbId: string) =>
     apiClient.get<ProcessingStatusResponse>(`/knowledge-bases/${kbId}/status`),
-  
-  processVideos: (kbId: string) =>
-    apiClient.post(`/knowledge-bases/${kbId}/process`),
   
   startExtraction: (kbId: string, options?: { batch_size?: number; reprocess?: boolean }) =>
     apiClient.post<ExtractionStatus>(`/knowledge-bases/${kbId}/extract`, options || {}),
@@ -57,43 +52,25 @@ export const knowledgeBasesApi = {
   getExtractionStatus: (kbId: string) =>
     apiClient.get<ExtractionStatus>(`/knowledge-bases/${kbId}/extraction-status`),
   
-  getConcepts: (kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) =>
+  getConcepts: (kbId: string, page = 1, limit = 20, type?: string, mediaId?: string, includeOrigin = true) =>
     apiClient.get<PaginatedResponse<ExtractedConcept>>(`/knowledge-bases/${kbId}/concepts`, { 
       params: { 
         limit, 
         skip: (page - 1) * limit, 
         concept_type: type === "all" ? undefined : type, 
-        video_id: videoId === "all" ? undefined : videoId,
+        media_id: mediaId === "all" ? undefined : mediaId,
         include_origin: includeOrigin 
       } 
     }),
   
-  getEntities: (kbId: string, page = 1, limit = 20, type?: string, videoId?: string, includeOrigin = true) =>
+  getEntities: (kbId: string, page = 1, limit = 20, type?: string, mediaId?: string, includeOrigin = true) =>
     apiClient.get<PaginatedResponse<ExtractedEntity>>(`/knowledge-bases/${kbId}/entities`, { 
       params: { 
         limit, 
         skip: (page - 1) * limit, 
         entity_type: type === "all" ? undefined : type, 
-        video_id: videoId === "all" ? undefined : videoId,
+        media_id: mediaId === "all" ? undefined : mediaId,
         include_origin: includeOrigin 
       } 
     }),
-  
-  startConsolidation: (kbId: string, options?: { similarity_threshold?: number }) =>
-    apiClient.post<ConsolidationStatus>(`/knowledge-bases/${kbId}/consolidate`, options || {}),
-  
-  getConsolidationStatus: (kbId: string) =>
-    apiClient.get<ConsolidationStatus>(`/knowledge-bases/${kbId}/consolidation-status`),
-  
-  getConsolidatedIdeas: (kbId: string, limit = 50) =>
-    apiClient.get<ConsolidatedIdea[]>(`/knowledge-bases/${kbId}/consolidated-ideas`, { params: { limit } }),
-  
-  getTemporalPatterns: (kbId: string) =>
-    apiClient.get<TemporalPattern[]>(`/knowledge-bases/${kbId}/patterns`),
-  
-  runPipeline: (kbId: string, options?: { reprocess?: boolean }) =>
-    apiClient.post<PipelineStatus>(`/knowledge-bases/${kbId}/run-pipeline`, options || {}),
-  
-  getPipelineStatus: (kbId: string) =>
-    apiClient.get<PipelineStatus>(`/knowledge-bases/${kbId}/pipeline-status`),
 };
