@@ -6,7 +6,6 @@ import type {
   SourceCreate,
   SourceIngestionStatus,
   MediaContent,
-  MediaIngestionStatus,
   ProcessingStatusResponse,
   ExtractedConcept,
   ExtractedEntity,
@@ -74,9 +73,6 @@ export const knowledgeBasesApi = {
         include_origin: includeOrigin 
       } 
     }),
-
-  getMediaIngestionStatus: (kbId: string, mediaId: string) =>
-    apiClient.get<MediaIngestionStatus>(`/knowledge-bases/${kbId}/media/${mediaId}/status`),
 
   retryMedia: (kbId: string, mediaId: string) =>
     apiClient.post<MediaContent>(`/knowledge-bases/${kbId}/media/${mediaId}/retry`),

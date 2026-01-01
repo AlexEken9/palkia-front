@@ -156,26 +156,8 @@ export interface ExtractionStatus {
   status: "pending" | "in_progress" | "completed" | "failed";
 }
 
-/**
- * Detailed media ingestion status for real-time pipeline tracking
- */
-export interface MediaIngestionStatus {
-  media_id: string;
-  title: string;
-  status: ProcessingStatus;
-  progress_percent: number;
-  current_stage: string;
-  message: string | null;
-  error_message: string | null;
-  started_at: string | null;
-  completed_at: string | null;
-}
-
-/**
- * UI-friendly status label mapping
- */
 export const PROCESSING_STATUS_LABELS: Record<ProcessingStatus, string> = {
-  pending: "En cola para procesar...",
+  pending: "En cola...",
   downloading: "Descargando...",
   transcribing: "Transcribiendo...",
   processing: "Procesando...",
@@ -184,29 +166,10 @@ export const PROCESSING_STATUS_LABELS: Record<ProcessingStatus, string> = {
   failed: "Error",
 };
 
-/**
- * Progress ranges for each status stage
- */
-export const PROCESSING_STATUS_PROGRESS: Record<ProcessingStatus, { min: number; max: number }> = {
-  pending: { min: 0, max: 0 },
-  downloading: { min: 10, max: 30 },
-  transcribing: { min: 30, max: 70 },
-  processing: { min: 70, max: 90 },
-  extracting: { min: 90, max: 99 },
-  completed: { min: 100, max: 100 },
-  failed: { min: 0, max: 0 },
-};
-
-/**
- * Check if a processing status is a final state (no more processing)
- */
 export function isTerminalStatus(status: ProcessingStatus): boolean {
   return status === "completed" || status === "failed";
 }
 
-/**
- * Check if a processing status indicates active processing
- */
 export function isActiveStatus(status: ProcessingStatus): boolean {
   return ["downloading", "transcribing", "processing", "extracting"].includes(status);
 }
