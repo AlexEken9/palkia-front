@@ -48,7 +48,7 @@ import {
   Progress,
   Skeleton,
 } from "@/components/ui";
-import { Navbar, Sidebar } from "@/components/shared";
+import { Navbar, Sidebar, MediaStatusBadge } from "@/components/shared";
 import { 
   useKnowledgeBase, 
   useSources, 
@@ -60,6 +60,7 @@ import {
   useDeleteKnowledgeBase,
   useDeleteSource,
   useSourceIngestionStatus,
+  useRetryMedia,
 } from "@/lib/hooks";
 import { formatDate, formatDuration, formatTimestamp, detectYouTubeSourceType } from "@/lib/utils";
 import type { Source, MediaContent, ProcessingStatus } from "@/types";
@@ -259,7 +260,7 @@ export default function KnowledgeBaseDetailPage({ params }: PageProps) {
             </TabsContent>
             
             <TabsContent value="media">
-              <MediaTab mediaItems={mediaItems || []} />
+              <MediaTab mediaItems={mediaItems || []} kbId={id} />
             </TabsContent>
 
             <TabsContent value="concepts">
@@ -639,7 +640,7 @@ function SourceCard({
                                 {formatDuration(item.duration_seconds)}
                               </span>
                             )}
-                            <StatusBadge status={item.status} />
+                            <MediaStatusBadge status={item.status} />
                           </div>
                         </div>
 
@@ -695,8 +696,13 @@ function SourceCard({
   );
 }
 
-function MediaTab({ mediaItems }: { mediaItems: MediaContent[] }) {
+function MediaTab({ mediaItems, kbId }: { mediaItems: MediaContent[]; kbId: string }) {
   const safeItems = Array.isArray(mediaItems) ? mediaItems : [];
+  const retryMutation = useRetryMedia();
+
+  const handleRetry = async (mediaId: string) => {
+    await retryMutation.mutateAsync({ kbId, mediaId });
+  };
 
   if (safeItems.length === 0) {
     return (
@@ -749,7 +755,23 @@ function MediaTab({ mediaItems }: { mediaItems: MediaContent[] }) {
                   )}
                 </div>
               </div>
-              <StatusBadge status={item.status} />
+              <MediaStatusBadge status={item.status} />
+              {item.status === "failed" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRetry(item.id)}
+                  disabled={retryMutation.isPending}
+                  className="shrink-0 text-xs h-7 px-2 gap-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                >
+                  {retryMutation.isPending ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3 w-3" />
+                  )}
+                  Retry
+                </Button>
+              )}
               {item.platform === "youtube" && (
                 <a 
                   href={`https://youtube.com/watch?v=${item.remote_id}`}
@@ -765,27 +787,6 @@ function MediaTab({ mediaItems }: { mediaItems: MediaContent[] }) {
         </Card>
       ))}
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: ProcessingStatus }) {
-  const config: Record<ProcessingStatus, { label: string; variant: "default" | "outline" | "secondary" | "destructive" | "palkia" | "pearl"; icon: React.ComponentType<{ className?: string }> }> = {
-    pending: { label: "Pending", variant: "outline", icon: Clock },
-    downloading: { label: "Downloading", variant: "outline", icon: RefreshCw },
-    transcribing: { label: "Transcribing", variant: "pearl", icon: RefreshCw },
-    processing: { label: "Processing", variant: "pearl", icon: RefreshCw },
-    extracting: { label: "Extracting", variant: "palkia", icon: RefreshCw },
-    completed: { label: "Completed", variant: "palkia", icon: CheckCircle2 },
-    failed: { label: "Failed", variant: "destructive", icon: XCircle },
-  };
-
-  const { label, variant, icon: Icon } = config[status];
-
-  return (
-    <Badge variant={variant} className="gap-1">
-      <Icon className={`h-3 w-3 ${status === "failed" ? "text-white" : ""} ${["downloading", "transcribing", "processing", "extracting"].includes(status) ? "animate-spin" : ""}`} />
-      {label}
-    </Badge>
   );
 }
 

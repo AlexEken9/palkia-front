@@ -73,4 +73,7 @@ export const knowledgeBasesApi = {
         include_origin: includeOrigin 
       } 
     }),
+
+  retryMedia: (kbId: string, mediaId: string) =>
+    apiClient.post<MediaContent>(`/knowledge-bases/${kbId}/media/${mediaId}/retry`),
 };

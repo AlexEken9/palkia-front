@@ -156,6 +156,24 @@ export interface ExtractionStatus {
   status: "pending" | "in_progress" | "completed" | "failed";
 }
 
+export const PROCESSING_STATUS_LABELS: Record<ProcessingStatus, string> = {
+  pending: "En cola...",
+  downloading: "Descargando...",
+  transcribing: "Transcribiendo...",
+  processing: "Procesando...",
+  extracting: "Extrayendo...",
+  completed: "Completado",
+  failed: "Error",
+};
+
+export function isTerminalStatus(status: ProcessingStatus): boolean {
+  return status === "completed" || status === "failed";
+}
+
+export function isActiveStatus(status: ProcessingStatus): boolean {
+  return ["downloading", "transcribing", "processing", "extracting"].includes(status);
+}
+
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
