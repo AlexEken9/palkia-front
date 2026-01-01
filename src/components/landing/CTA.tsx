@@ -59,11 +59,14 @@ export function CTA() {
                     <Link href="/knowledge-bases">
                         <Button
                             size="lg"
-                            className="group h-16 px-10 rounded-full bg-white text-black hover:bg-palkia-50 font-bold text-xl shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300"
+                            className="group relative h-16 px-10 rounded-full bg-white text-black font-bold text-xl overflow-hidden shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] transition-all duration-500"
                         >
-                            <Zap className="mr-2 h-6 w-6 group-hover:fill-current" />
-                            Start Now
-                            <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-palkia-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <span className="relative flex items-center gap-2">
+                                <Zap className="h-6 w-6" />
+                                Start Now
+                                <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                            </span>
                         </Button>
                     </Link>
                 </motion.div>

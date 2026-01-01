@@ -100,10 +100,13 @@ export function Hero() {
                     <Link href="/knowledge-bases">
                         <Button
                             size="lg"
-                            className="h-14 px-10 rounded-full bg-white text-black hover:bg-palkia-50 font-bold text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                            className="group relative h-16 px-10 rounded-full bg-white text-black font-bold text-lg overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)] transition-all duration-500"
                         >
-                            <Zap className="mr-2 h-5 w-5" />
-                            Launch App
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-palkia-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <span className="relative flex items-center gap-2">
+                                <Zap className="h-5 w-5" />
+                                Launch App
+                            </span>
                         </Button>
                     </Link>
                 </motion.div>
