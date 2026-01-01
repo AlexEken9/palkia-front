@@ -33,7 +33,7 @@ import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase } fro
 import { formatDate } from "@/lib/utils";
 import type { KnowledgeBase } from "@/types";
 
-type SortField = "name" | "created_at" | "video_count" | "source_count";
+type SortField = "name" | "created_at" | "media_count" | "source_count";
 type SortOrder = "asc" | "desc";
 
 export default function KnowledgeBasesPage() {
@@ -114,7 +114,7 @@ export default function KnowledgeBasesPage() {
               </p>
             </div>
             <Button 
-              variant="gradient" 
+              variant="default" 
               className="gap-2"
               onClick={() => setIsCreateDialogOpen(true)}
             >
@@ -140,7 +140,7 @@ export default function KnowledgeBasesPage() {
                 {([
                   { field: "name", label: "Name" },
                   { field: "created_at", label: "Date" },
-                  { field: "video_count", label: "Videos" },
+                  { field: "media_count", label: "Media" },
                 ] as const).map(({ field, label }) => (
                   <Button
                     key={field}
@@ -209,7 +209,7 @@ export default function KnowledgeBasesPage() {
                     Create your first knowledge base to start extracting intelligence
                   </p>
                   <Button 
-                    variant="gradient" 
+                    variant="default" 
                     className="mt-4"
                     onClick={() => setIsCreateDialogOpen(true)}
                   >
@@ -262,7 +262,7 @@ export default function KnowledgeBasesPage() {
               Cancel
             </Button>
             <Button 
-              variant="gradient"
+              variant="default"
               onClick={handleCreateKB}
               disabled={!newKBName.trim() || createMutation.isPending}
             >
@@ -377,7 +377,7 @@ function KBCard({ kb, onDelete }: { kb: KnowledgeBase; onDelete: () => void }) {
             <div className="flex items-center gap-1.5">
               <Video className="h-4 w-4 text-palkia-500" />
               <span className="text-silver-600 dark:text-silver-400">
-                {kb.video_count} videos
+                {kb.media_count} media
               </span>
             </div>
             <div className="flex items-center gap-1.5">

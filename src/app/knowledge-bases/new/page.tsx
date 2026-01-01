@@ -92,7 +92,7 @@ export default function NewKnowledgeBasePage() {
                   </Button>
                   <Button
                     type="submit"
-                    variant="gradient"
+                    variant="default"
                     disabled={!name.trim() || createMutation.isPending}
                   >
                     {createMutation.isPending && (
