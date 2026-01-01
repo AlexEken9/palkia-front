@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { knowledgeBasesApi } from "@/lib/api";
 import type { KnowledgeBaseCreate, SourceCreate } from "@/types/api";
+import { isTerminalStatus } from "@/types/api";
 import { toast } from "sonner";
 import { isValidUUID } from "@/lib/utils";
 
@@ -192,5 +193,43 @@ export function useEntities(kbId: string, page = 1, limit = 20, type?: string, m
     },
     enabled: !!kbId && isValidUUID(kbId),
     placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useMediaIngestionStatus(kbId: string, mediaId: string, enabled = true) {
+  return useQuery({
+    queryKey: ["media-ingestion", kbId, mediaId],
+    queryFn: async () => {
+      const { data } = await knowledgeBasesApi.getMediaIngestionStatus(kbId, mediaId);
+      return data;
+    },
+    enabled: enabled && !!kbId && !!mediaId && isValidUUID(kbId) && isValidUUID(mediaId),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (data && isTerminalStatus(data.status)) return false;
+      return 2000;
+    },
+  });
+}
+
+export function useRetryMedia() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ kbId, mediaId }: { kbId: string; mediaId: string }) => {
+      const response = await knowledgeBasesApi.retryMedia(kbId, mediaId);
+      return response.data;
+    },
+    onSuccess: (_, { kbId, mediaId }) => {
+      queryClient.invalidateQueries({ queryKey: ["media-ingestion", kbId, mediaId] });
+      queryClient.invalidateQueries({ queryKey: ["media", kbId] });
+      queryClient.invalidateQueries({ queryKey: ["source-ingestion"] });
+      queryClient.invalidateQueries({ queryKey: ["processing-status", kbId] });
+      toast.success("Retry initiated");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to retry processing");
+      console.error(error);
+    },
   });
 }
